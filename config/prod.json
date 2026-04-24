@@ -1,5 +1,5 @@
 {
-  "environment": "dev",
+  "environment": "prod",
   "siteUrl": "https://reedelsevier.sharepoint.com/sites/OG-TechnicalResilienceRegister",
-  "listName": "Governance Control Tower - DEV"
+  "listName": "Governance Control Tower"
 }
