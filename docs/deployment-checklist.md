@@ -1,5 +1,15 @@
 # BRMS build and acceptance checklist
 
+## Recovery from the interrupted build
+
+- [ ] Read the production-only correction and stop affected BRMS flows before changing their targets.
+- [ ] Identify exact newly created DEV list IDs from this build, including creation evidence, item counts, and dependencies.
+- [ ] Preserve and verify any real data outside the deletion targets; use recoverable list deletion and retain restoration details.
+- [ ] Remove all confirmed unwanted DEV lists from live site contents; keep ambiguous/data-preservation failures as specific blockers.
+- [ ] Remove obsolete local dev/prod configs and environment naming rules; do not merely overlay new files onto a stale package.
+- [ ] Rebind retained flows to the correct unsuffixed lists and verify no active references to deleted list IDs remain.
+- [ ] Update Loop with the confirmed naming decision, actual cleanup results, URLs, and changed flow names/IDs.
+
 ## Discovery and source alignment
 
 - [x] Record BRMS home site: https://reedelsevier.sharepoint.com/sites/ELSBUProjects/BRMS
@@ -13,7 +23,7 @@
 
 ## Configuration and SharePoint
 
-- [ ] Resolve an independent site/list/library mapping for every logical resource in each environment.
+- [ ] Resolve one production resource map with an independent site/list/library mapping for every logical resource and no DEV/PROD labels in resource names.
 - [ ] Implement and validate configuration loading; the example JSON alone is not a working loader.
 - [ ] Reuse or create the register with exactly the 14 baseline fields and correct internal names.
 - [ ] Apply exact choices, required settings, date settings, attachment behavior, and versioning.
@@ -37,10 +47,10 @@
 - [ ] Verify repeated runs, concurrent attempts, partial failures, and reminder preview produce no duplicate intended sends.
 - [ ] Verify source edits preserve the governance review date.
 - [ ] Test a real governed document on a second accessible site and prove correct mapping and permissions.
-- [ ] Rebind one supporting test resource to a different location through configuration, refresh affected bindings, and rerun successfully.
+- [ ] Validate an alternative resource mapping through read-only resolution of an existing accessible location; do not create test lists/sites or relocate working production resources merely for a test.
 - [ ] Verify links and permissions as an intended reader, not only as the flow connection owner.
 - [ ] Document recovery for inaccessible sources and ambiguous notification outcomes.
-- [ ] Confirm test runs cannot update the original deployment or PROD through inherited bindings.
+- [ ] Confirm validation is restricted to identified synthetic records/files in the single BRMS deployment and cannot update unrelated business records or the original deployment.
 - [ ] Record run evidence, resource/flow inventories, deployment steps, and rollback steps.
 - [ ] Keep real-recipient communications and production cutover pending explicit rollout authorization.
 - [ ] Report exact remaining dependencies; distinguish documented, created, tested, and enabled states.

@@ -8,13 +8,13 @@ The home site is https://reedelsevier.sharepoint.com/sites/ELSBUProjects/BRMS. T
 
 Inspect the home site and existing BRMS lists, libraries, pages, and accessible flows before creating anything. Identify the actual register the team created from the guide. Reuse it if compatible, report populated schema mismatches, and preserve existing content and permissions.
 
-Configure the register, configuration list, notification history, automation run history, and each monitored source library independently. Each resolved mapping must include environment, logical role, site URL, actual list/library ID, display name, relevant folder scope, and connection binding. Source libraries may be on different sites. A connection provides access; it does not specify a resource's address.
+Configure the register, configuration list, notification history, automation run history, and each monitored source library independently. Each resolved mapping must include deployment key, logical role, site URL, actual list/library ID, display name, relevant folder scope, and connection binding. Source libraries may be on different sites. A connection provides access; it does not specify a resource's address.
 
-The example under `config/` is a planning template, not an implemented configuration loader. Scout must implement and test the mappings, including separate settings for DEV and PROD. Unknown or inaccessible configured locations must be reported explicitly; do not silently substitute the home site.
+The example under `config/` is a planning template, not an implemented configuration loader. Scout must implement and test one BRMS production resource map. Do not create separate environment copies or add DEV/PROD to resource names. Unknown or inaccessible configured locations must be reported explicitly; do not silently substitute the home site.
 
 ## Register
 
-Candidate names from the original configuration are `Governance Control Tower - DEV` and `Governance Control Tower`. Resolve existing live names before creating resources. Apply the 14-field document schema. Disable attachments and enable version history using the site's normal retention setting. Original documents remain linked through DocumentLink.
+Use the existing correctly named `Governance Control Tower` register where compatible. First complete [the scoped DEV-list cleanup](brms-production-cleanup-and-resume.md), then resolve the actual unsuffixed names before creating any missing resources. Apply the 14-field document schema. Disable attachments and enable version history using the site's normal retention setting. Original documents remain linked through DocumentLink.
 
 Apply [the supplied four-section form layout](../config/brms-document-form.json), verifying its display labels against the live list. Source Modified Date and Active are omitted from this baseline form. Provide an appropriate list view or authorized editing path for operators to manage Active.
 

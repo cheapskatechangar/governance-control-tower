@@ -1,25 +1,32 @@
+[CmdletBinding()]
 param (
-    [string]$Environment = "dev"
+    [string]$ConfigPath = (Join-Path $PSScriptRoot '..\config\brms.json'),
+    [string]$ClientId
 )
 
-Write-Host "Starting Governance Control Tower deployment..."
-Write-Host "Environment: $Environment"
-
-$scriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
-$repoRoot = Split-Path -Parent $scriptRoot
-$configPath = Join-Path $repoRoot "config\$Environment.json"
-
-if (-not (Test-Path $configPath)) {
-    throw "Config file not found: $configPath"
+$ErrorActionPreference = 'Stop'
+if (-not (Test-Path -LiteralPath $ConfigPath -PathType Leaf)) {
+    throw "Config file not found: $ConfigPath"
+}
+$config = Get-Content -LiteralPath $ConfigPath -Raw | ConvertFrom-Json
+if (($config.PSObject.Properties.Name -contains 'environment') -or
+    ($config.PSObject.Properties.Name -contains 'environments')) {
+    throw 'Obsolete environment configuration. Use the single config/brms.json configuration.'
+}
+if ([string]::IsNullOrWhiteSpace($config.siteUrl) -or
+    [string]::IsNullOrWhiteSpace($config.listName)) {
+    throw 'The BRMS bootstrap configuration requires siteUrl and listName.'
+}
+if ($config.listName -match '(?i)\b(?:DEV|PROD)\b') {
+    throw 'BRMS resource names must not contain DEV or PROD environment labels.'
+}
+if ([string]::IsNullOrWhiteSpace($ClientId)) {
+    throw 'An existing approved PnP client ID is required for this bootstrap. Use other supported authenticated tooling if none is available.'
 }
 
-$config = Get-Content $configPath | ConvertFrom-Json
-
-Write-Host "Using site: $($config.siteUrl)"
-Write-Host "Target list: $($config.listName)"
-
-& "$scriptRoot\00-install-prereqs.ps1"
-& "$scriptRoot\01-connect.ps1" -siteUrl $config.siteUrl
-& "$scriptRoot\02-create-governance-list.ps1" -listName $config.listName
-
-Write-Host "Deployment complete."
+Write-Host "Bootstrapping the BRMS register at $($config.siteUrl)"
+Write-Host "Register: $($config.listName)"
+& "$PSScriptRoot\00-install-prereqs.ps1"
+& "$PSScriptRoot\01-connect.ps1" -siteUrl $config.siteUrl -clientId $ClientId
+& "$PSScriptRoot\02-create-governance-list.ps1" -listName $config.listName
+Write-Host 'Register bootstrap finished. The document schema, forms, views, supporting resources, and flows still require the Scout build instructions.'

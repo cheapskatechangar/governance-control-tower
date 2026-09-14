@@ -57,11 +57,12 @@ The following are confirmed by the user's directions or the supplied baseline an
 |---|---|
 | Build a BRMS deployment for another part of the organization | User instruction in the project conversation |
 | Use the supplied BRMS SharePoint URL as the home/default site, with independently configurable locations | User instructions on the site and distributed resources |
-| Follow BRMS Power Automate patterns | User instruction; exact conventions still require live discovery |
+| Follow BRMS Power Automate patterns with unsuffixed names | User instruction; exact conventions still require live discovery |
+| Use one production deployment and remove newly created DEV lists from the interrupted build | Latest user correction; earlier DEV/PROD split is superseded |
 | Use the 14-field document-governance baseline | Supplied setup guide; source scope reconciled in the active repository docs |
 | Maintain the supplied Loop page throughout delivery and create linked detail pages when useful | User instruction on project reporting |
 
-Record the provisional flow naming pattern, exact reminder cadence, actual environment, and any undiscovered owner as unresolved/proposed until verified. Do not invent a decision date if it cannot be recovered; record the date the direction was entered and identify the source instead.
+Record the unsuffixed flow naming pattern, exact reminder cadence, actual Power Platform environment, and any undiscovered owner as unresolved/proposed until verified. Do not invent a decision date if it cannot be recovered; record the date the direction was entered and identify the source instead.
 
 ### Blockers
 
@@ -82,7 +83,7 @@ Record each flow as soon as it exists and update the same entry when it changes:
 | Field | Required content |
 |---|---|
 | Function | Review Schedule Refresh, Review Reminders, Source Document Monitor, or a justified supporting function |
-| Exact flow name | Actual display name in Power Automate, including environment suffix where used |
+| Exact flow name | Actual display name in Power Automate with no DEV/PROD label |
 | Flow ID and management URL | Verified ID and direct working link from Power Automate |
 | Environment and solution | Actual environment name/ID and solution name when applicable |
 | Trigger and schedule | Trigger type, configured source where applicable, recurrence, and time zone |
@@ -96,7 +97,7 @@ Do not equate a saved flow with a tested or enabled flow. Record a deployment se
 
 ### Testing and handoff
 
-Record test ID, scenario, environment, input/test-item reference, expected result, actual result, Passed/Failed/Blocked/Not run, run/evidence link, date, and any related issue. Include the cross-site document and resource-relocation tests, date boundaries, reminder deduplication, source-edit/review-date separation, and environment isolation from the build brief.
+Record test ID, scenario, environment, input/test-item reference, expected result, actual result, Passed/Failed/Blocked/Not run, run/evidence link, date, and any related issue. Include the cross-site document and read-only resource-portability checks, date boundaries, reminder deduplication, source-edit/review-date separation, and isolation of synthetic test records from real business data and the original deployment.
 
 Keep final handoff steps, operations/recovery instructions, notification activation state, remaining authorizations, and unresolved dependencies visible. Put sensitive run details in an appropriate restricted location and link them without copying credentials or unnecessary personal/document data into Loop.
 
@@ -113,3 +114,7 @@ The user has authorized routine progress edits and useful linked pages. Do not r
 If access or saving fails, preserve the exact intended update as pending in the current handoff or a suitable restricted artifact. Record the affected page, action, failure, and retry dependency. Continue independent implementation work. Once access is restored, reread the page, merge the pending update with current contributions, verify saving, and mark the reporting blocker resolved. Never claim that Loop is current when a required update remains unsaved.
 
 For each milestone handoff, include a short factual statement identifying the result, evidence, next action, and Loop update state. The project is ready for handoff only when its relevant Loop entries are current or any unsaved entries are explicitly listed as reporting blockers.
+
+## Cleanup reporting for the production-only correction
+
+Mark the earlier two-profile decision as Superseded. Record the single-production, no-environment-label direction as Confirmed. Before cleanup, record the exact unwanted list IDs, original URLs, creation evidence, item counts, data-preservation plan/results, and affected flows. After each recoverable deletion, record the actual result and restoration information. Keep deleted resources in history with their state and replacement links. Do not claim deletion merely because a list was renamed, hidden, or removed from navigation. Record unresolved candidates as specific blockers, then continue independent work. Verify retained flows use correct live list IDs and unsuffixed display names.

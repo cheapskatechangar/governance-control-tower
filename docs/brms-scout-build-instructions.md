@@ -1,5 +1,9 @@
 # Scout build instructions: BRMS document governance
 
+## Current correction: apply before resuming
+
+The user stopped the build because it created DEV-suffixed SharePoint lists. This deployment is production only, with no DEV or PROD labels in resource names. Read `docs/brms-production-cleanup-and-resume.md` first. Delete only the newly created DEV lists confirmed to belong to the interrupted BRMS build, using recoverable deletion after preserving any real data. Remove their dependencies and obsolete local configuration before continuing. This correction supersedes the earlier two-profile package.
+
 ## Mission and confirmed scope
 
 Build the Business Resilience Management System (BRMS) deployment of Governance Control Tower in Microsoft 365. This duplicates the document-governance system for another part of the organization. Carry the work through discovery, creation, configuration, testing, repository updates, and a usable handoff. Do not stop after producing an architecture or a list of suggested steps.
@@ -9,7 +13,7 @@ Build the Business Resilience Management System (BRMS) deployment of Governance 
 - The home site is the navigation hub and default resource location. It is not a mandatory storage location for every list, library, or document.
 - Source baseline: `Governance_Control_Tower_SharePoint_List_Setup_Guidev2.docx`, the guide already supplied to the team. The repository now transcribes its 14 document fields, form, views, and review rules.
 - The guide's body labels itself Version 1.0, prepared August 28, 2026. Its explicit scope is document governance. The older RTO, immutable backup, recovery testing, and blue/green material is preserved in `docs/legacy/technical-resilience/` for historical reference. Do not build those modules for this deployment. Playbook remains a valid document type.
-- Use existing BRMS Power Automate patterns where found. If no pattern is available, proceed with the provisional flow name `BRMS - GCT - <Function> - <DEV|PROD>` and record the assumption.
+- Use existing BRMS Power Automate patterns where found. If no pattern is available, proceed with the provisional flow name `BRMS - GCT - <Function>` and record the assumption.
 
 Read `README.md`, `docs/field-schema.md`, `docs/setup-guide.md`, `docs/power-automate-flows.md`, `docs/deployment-checklist.md`, `docs/brms-loop-project-workspace.md`, `config/brms-document-form.json`, and `config/brms-deployment.example.json` before building. These active documents supersede the legacy scope. Apply the user's latest directions if they change this brief.
 
@@ -25,9 +29,9 @@ Reuse compatible resources. Do not replace populated columns, recreate the whole
 
 Inspect accessible original document-governance flows or exports when available. The repository currently contains no exported flow definitions. Build from the documented rules where sufficient and identify any behavior that cannot be verified as an exact duplicate. Do not reuse the Enterprise AI Agent Control Tower/Planner workflow or infer that its environment belongs to BRMS.
 
-Identify the available Power Platform environment and normal BRMS deployment practice. DEV and PROD must have distinct resource bindings and test boundaries; this does not mean creating new Power Platform environments. Do not invent environment IDs, connection identities, business owners, or test recipients.
+Use one production BRMS deployment in the existing selected Power Platform environment. Do not create separate environment copies or put DEV/PROD in site, list, library, page, solution, or flow names. Record the actual Power Platform environment identity administratively without renaming it. Validate using identified synthetic records in the same resources, with notifications in preview. Do not invent environment IDs, connection identities, business owners, or test recipients.
 
-Use supported authenticated tools and the connections available to you. The existing PowerShell scripts only attempt to create one list and may continue after authentication is skipped. Validate the target connection and make scripts fail on an unavailable connection before using them. Do not present the wrapper's success message as a complete deployment.
+Use supported authenticated tools and the connections available to you. The bootstrap scripts target one unsuffixed register through `config/brms.json` and stop if required authentication is missing. They do not implement the complete system or perform cleanup. Validate the live target before using them. Do not present the wrapper's success message as a complete deployment.
 
 ## 2. Implement independently configurable resource locations
 
@@ -43,11 +47,11 @@ Separate the home-page address, each resource's address, and the authenticated c
 | Governed document | Its original location | DocumentLink plus resolved source identity where supported |
 | Home page and reporting | BRMS navigation hub | Links/data sources resolved from the resource map |
 
-Create a resource map per environment containing logical role/source key, site URL, list/library ID, display name, optional folder scope, connection binding, and enabled state. Use explicit source mappings. Do not derive every URL by appending a path to the BRMS home site, or use display name alone to identify resources.
+Create one BRMS production resource map containing logical role/source key, site URL, list/library ID, display name, optional folder scope, connection binding, and enabled state. Use explicit source mappings. Do not derive every URL by appending a path to the BRMS home site, or use display name alone to identify resources.
 
-Implement the example configuration contract rather than treating its JSON as executable. Its null IDs and empty source list are unresolved settings. A null resource site URL may explicitly inherit the configured default; a missing or inaccessible resolved resource must fail that operation with a useful error, never silently fall back to BRMS or another environment.
+Implement the example configuration contract rather than treating its JSON as executable. Its null IDs and empty source list are unresolved settings. A null resource site URL may explicitly inherit the configured default; a missing or inaccessible resolved resource must fail that operation with a useful error, never silently fall back to a different resource or the original deployment.
 
-Use one authoritative live configuration store for each environment. A practical minimum for a BRMS Configuration list is a unique `ConfigKey`, `Environment`, `Kind`, `Value` (plain multiline JSON or equivalent typed fields), and `Enabled`. Document the final schema and value validation. Store source identities/checkpoints here or in a small companion operational list when needed; do not overload Notes or add unnecessary fields to the 14-column register.
+Use one authoritative live configuration store for this deployment. A practical minimum for a BRMS Configuration list is a unique `ConfigKey`, `Kind`, `Value` (plain multiline JSON or equivalent typed fields), and `Enabled`. Document the final schema and value validation. Store source identities/checkpoints here or in a small companion operational list when needed; do not overload Notes or add unnecessary fields to the 14-column register.
 
 The configuration list cannot discover its own location. Keep its minimal bootstrap binding in deployment settings/environment variables or an explicitly documented flow initialization. Treat changes to bootstrap settings as deployment configuration changes.
 
@@ -61,7 +65,7 @@ Centralized visibility does not require copying the documents or granting broade
 
 ## 3. Build the SharePoint register and supporting resources
 
-Apply the exact baseline in `docs/field-schema.md`: **14 fields including Title**, not 14 additional columns. Preserve the existing list name when the team has already built the correct register. Candidate bootstrap names are `Governance Control Tower - DEV` and `Governance Control Tower`; resolve actual live names before creation.
+Apply the exact baseline in `docs/field-schema.md`: **14 fields including Title**, not 14 additional columns. Preserve the existing list name when the team has already built the correct register. Use `Governance Control Tower`, `BRMS Configuration`, `BRMS Notification History`, and `BRMS Automation Run History` as the unsuffixed resource names, reusing correctly named compatible existing resources. Complete the scoped cleanup of newly created DEV lists before resuming dependent flow wiring.
 
 Required fields are Document Name, Document Link, Document Type, Department, Owner, Last Reviewed Date, Review Frequency, and Active. Optional fields are Reviewer, Notes, Next Review Due, Days to Review, Status, and Source Modified Date. Preserve the guide's exact internal names, choices, person settings, and date formats.
 
@@ -69,8 +73,8 @@ Disable attachments, enable version history, and apply `config/brms-document-for
 
 Create or reuse separately mapped Configuration, Notification History, and Automation Run History lists. Document their schemas and field ownership:
 
-- Notification History needs a unique notification key, environment/register/item identity, review-cycle due date, rule/threshold, intended recipient identity, state, attempt time, sent time, and safe outcome/run details. A deterministic hash can fit a compound key into a unique single-line column. Keep sufficient source fields to explain that key.
-- Automation Run History needs a run/correlation key, environment, function/flow identity, start/end, mapping/configuration version, counts, result, failed resource/item references, and sanitized errors.
+- Notification History needs a unique notification key, deployment/register/item identity, review-cycle due date, rule/threshold, intended recipient identity, state, attempt time, sent time, and safe outcome/run details. A deterministic hash can fit a compound key into a unique single-line column. Keep sufficient source fields to explain that key.
+- Automation Run History needs a run/correlation key, deployment key, actual Power Platform environment identity, function/flow identity, start/end, mapping/configuration version, counts, result, failed resource/item references, and sanitized errors.
 - Source monitoring needs a stable file-to-register mapping and checkpoint where supported. Use site/library/file identity plus register identity, not a title or an item number by itself. Keep this state in a documented companion resource if it cannot fit cleanly in Configuration.
 
 Preserve the team's existing access model. Avoid creating a second central document library when existing locations suffice. Create a new controlled-document library only where the BRMS deployment actually needs storage, and record its mapping independently.
@@ -95,7 +99,7 @@ The source guide establishes a 30-day Due Soon window, but does not specify remi
 
 Preview must show the intended recipient, document, review due date, status, and direct original-document link without sending. Actual messages should give the owner a clear review action and should not imply that an edit or republish counts as review completion.
 
-Use an atomic unique notification key including environment, register identity, item identity, review cycle, rule, and recipient. Record Preview, Pending, Sent, Failed, Suppressed, or Unknown outcomes. Repeated runs and concurrent attempts must not produce duplicate reminders. Handle a send-success/log-failure ambiguity as Unknown for reconciliation, not a blind resend. Known send failures may be retried according to the documented bounded retry policy. Suppress inactive, ineligible, already-notified, and unresolved-recipient records with a recorded reason.
+Use an atomic unique notification key including deployment key, register identity, item identity, review cycle, rule, and recipient. Record Preview, Pending, Sent, Failed, Suppressed, or Unknown outcomes. Repeated runs and concurrent attempts must not produce duplicate reminders. Handle a send-success/log-failure ambiguity as Unknown for reconciliation, not a blind resend. Known send failures may be retried according to the documented bounded retry policy. Suppress inactive, ineligible, already-notified, and unresolved-recipient records with a recorded reason.
 
 Do not send to real owners/reviewers while constructing or testing. A send test requires an explicitly authorized test recipient; otherwise validate in preview. Production notifications and cutover remain disabled until the user authorizes the concrete rollout. This does not block building and testing the available components.
 
@@ -111,13 +115,13 @@ Validate rename/move behavior using the identifiers available from the connector
 
 Use pagination, filtered/indexed queries where needed, bounded retries, explicit timeout/failure handling, and per-item error reporting. Prevent overlapping processing from duplicating sends or overwriting recent user changes. Re-read records and patch only flow-owned fields where the connector requires concurrency protection.
 
-Maintain a single documented owner for each automated field. Record the actual connector/connection bindings and test that no copied flow still points at the original deployment or crosses into PROD during DEV tests.
+Maintain a single documented owner for each automated field. Record the actual connector/connection bindings and verify that no retained or copied flow still points at a deleted DEV list or the original deployment. Scope synthetic validation writes to the recorded test items in this single production deployment.
 
 A separate review-approval workflow is not part of the established baseline. The existing form allows Last Reviewed Date to be updated after the approved review process. Do not invent approvers or an automatic review-completion action. Record any genuinely missing review-process requirement for the business owner.
 
 ## 5. Acceptance tests
 
-Use isolated BRMS test records and actual test documents. A home-page link can verify hyperlink entry, but cannot prove file monitoring. Retain test IDs and run evidence. Test at least:
+Use identified synthetic BRMS test records and actual test documents within the single deployment. Do not create a separate test list, library, or site. A home-page link can verify hyperlink entry, but cannot prove file monitoring. Retain test IDs and run evidence. Test at least:
 
 | Area | Required proof |
 |---|---|
@@ -127,8 +131,8 @@ Use isolated BRMS test records and actual test documents. A home-page link can v
 | Reminders | Preview shows correct intended recipients; inactive/unresolved cases suppressed; repeated and concurrent runs deduplicate; new legitimate review cycle can be notified |
 | Failure recovery | A record failure does not silently lose later records; inaccessible source is visible; ambiguous send is reconciled; successful records are counted accurately |
 | Distributed documents | Register at its mapped location and a real registered document on a second accessible site; correct source observation and link access |
-| Resource relocation | Rebind one supporting DEV resource to another test location using configuration, refresh affected bindings, and rerun without rewriting business logic |
-| Isolation and permissions | DEV cannot write to the original system or PROD; an intended reader can use the page and permitted source links |
+| Resource portability | Resolve an alternative existing source/resource mapping in a read-only check; keep business logic configurable without creating another test deployment or moving working resources |
+| Isolation and permissions | Synthetic validation is restricted to recorded test items; unrelated BRMS records and the original deployment are preserved; intended readers can open permitted links |
 
 Use a second site only when it is actually available and authorized for the test. If unavailable, finish all other tests and report the distributed-location proof as blocked, not passed. A simulated mapping does not substitute for a live cross-site test.
 
@@ -148,4 +152,4 @@ Include the exact procedure to add a source library, relocate a resource, change
 
 Proceed autonomously through the available reversible build and test work. If access, a required business setting, or a missing source artifact blocks one component, state the exact dependency and affected component, continue independent work, and group remaining questions into one concise handoff. Do not repeatedly request confirmation for routine implementation choices.
 
-The requested outcome is a working BRMS document register, usable forms/views/home navigation, configurable resource mappings, the three implemented flows, operational history, test evidence including distributed-location verification when access permits, a current linked Loop project workspace, and a documented path to enable authorized production communications.
+The requested outcome is a working single-production BRMS document register, usable forms/views/home navigation, configurable resource mappings, the three implemented flows, operational history, test evidence including distributed-location verification when access permits, a current linked Loop project workspace, and a documented path to enable authorized production communications.

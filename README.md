@@ -8,7 +8,7 @@ The home site is the navigation hub and default resource location. Each register
 
 ## Start here
 
-Give Scout [the complete BRMS build instructions](docs/brms-scout-build-instructions.md). They cover discovery, SharePoint creation, configuration, flow construction, verification, repository updates, and handoff.
+Start with [the cleanup and resume instructions](docs/brms-production-cleanup-and-resume.md) for the interrupted build, then follow [the complete BRMS build instructions](docs/brms-scout-build-instructions.md). This is one production deployment with no DEV or PROD labels in resource names.
 
 | File | Purpose |
 |---|---|
@@ -30,11 +30,11 @@ Retain the guide's baseline schema when inspecting the list the team may already
 
 ## Configuration and implementation status
 
-`config/dev.json` and `config/prod.json` currently identify the BRMS site and the original candidate register names. These are bootstrap inputs for the existing minimal list-creation script, not a complete deployment model. They do not declare that all resources must share one site.
+`config/brms.json` is the single bootstrap configuration for the BRMS register. The obsolete dev/prod configuration files have been removed. The register and supporting resources have unsuffixed names; independently mapped locations remain supported.
 
 `config/brms-deployment.example.json` is a design template for Scout to implement and resolve against live resources. It is deliberately marked as not runtime-ready; null resource IDs and empty source mappings are unresolved configuration, not deployable bindings. The current scripts do not consume it.
 
-The current scripts install prerequisites and attempt to create a single list. They do not implement the document schema, views, form, supporting lists, or flows. The connection helper can skip authentication while the deployment wrapper continues. Scout must validate connectivity and correct that behavior before using those scripts for deployment.
+The scripts can bootstrap one register using `config/brms.json` and an existing approved PnP client ID. They do not implement the full schema, views, form, supporting lists, cleanup, or flows. Missing authentication now stops the bootstrap; its output does not claim the complete system was deployed. Scout can use other supported authenticated tooling for the full build.
 
 No live BRMS build, resource inspection, or flow test is established by these repository files. Scout must record actual resource IDs, flow IDs, run evidence, and remaining blockers in the deployment handoff.
 
@@ -42,6 +42,6 @@ The user has designated the existing `Governance Control Tower implementation` L
 
 ## Deployment conventions
 
-Use the team's existing BRMS flow conventions when available. If discovery finds none, use the provisional pattern `BRMS - GCT - <Function> - <DEV|PROD>` for new flows and record that assumption. Keep production communications disabled during construction and verification until an intended-recipient rollout has been authorized.
+Use the team's existing BRMS flow conventions when available. If discovery finds none, use the provisional pattern `BRMS - GCT - <Function>` for new flows and record that assumption. Keep production communications disabled during construction and verification until an intended-recipient rollout has been authorized.
 
 Do not commit credentials, employee details, document contents, or populated organizational exports to this public repository. Keep build templates and sanitized evidence here; keep operational configuration and detailed run evidence in the access-controlled BRMS deployment location.

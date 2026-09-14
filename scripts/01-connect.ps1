@@ -1,17 +1,18 @@
+[CmdletBinding()]
 param (
+    [Parameter(Mandatory = $true)]
+    [ValidateNotNullOrEmpty()]
     [string]$siteUrl,
     [string]$clientId
 )
 
-Write-Host "Connection step placeholder."
-Write-Host "Site URL: $siteUrl"
-
+$ErrorActionPreference = 'Stop'
 if ([string]::IsNullOrWhiteSpace($clientId)) {
-    Write-Host "No clientId found. PnP connection skipped until Entra app registration is approved."
-    return
+    throw 'Connection cannot proceed without an existing approved PnP client ID.'
 }
-
-Connect-PnPOnline -Url $siteUrl -Interactive -ClientId $clientId
-
-$web = Get-PnPWeb
-Write-Host "Connected to site:" $web.Title
+Connect-PnPOnline -Url $siteUrl -Interactive -ClientId $clientId -ErrorAction Stop
+$web = Get-PnPWeb -ErrorAction Stop
+if ($web.Url.TrimEnd('/') -ne $siteUrl.TrimEnd('/')) {
+    throw 'The authenticated site does not match the configured BRMS register site.'
+}
+Write-Host "Connected to site: $($web.Title)"

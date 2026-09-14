@@ -4,7 +4,7 @@ The active system follows the supplied document-governance setup guide. The Tech
 
 ## Naming and implementation basis
 
-Discover an existing BRMS flow or documented convention first. If none is available, use the proposed pattern `BRMS - GCT - <Function> - <DEV|PROD>` for new flows. Record the naming decision and the actual Power Automate environment. A DEV suffix or separate SharePoint list does not prove that a separate Power Platform environment exists.
+Discover an existing BRMS flow or documented convention first. If none is available, use the proposed pattern `BRMS - GCT - <Function>` for new flows. Record the naming decision and the actual Power Automate environment. Use the existing selected Power Platform environment for this single production deployment. Record its actual identity as administrative metadata; do not rename that environment or append DEV/PROD labels to resource names.
 
 No exported baseline flow definitions are currently present in this repository. Inspect authorized live source flows when available. Rebuild from the schema and rules below where sufficient; identify unverified behavior instead of calling it an exact copy.
 
@@ -38,9 +38,9 @@ A flow action can resolve a source after execution begins; a source event must a
 - Observe source updates without copying documents. Do not auto-register an unknown document or invent its Owner, LastReviewedDate, or review frequency.
 - Process pages of records, use bounded retries, log per-record failures, and prevent overlapping runs from overwriting recent user edits. Re-read before patching where needed and patch only owned fields.
 - Keep review reminders in preview by default. Notification history must distinguish Preview, Pending, Sent, Failed, Suppressed, and Unknown delivery outcome. Log only necessary message metadata.
-- Use an atomic unique notification key built from environment, register identity, item identity, review cycle, reminder rule, and intended recipient. Retry known failures safely; reconcile ambiguous sends instead of assuming a successful send or blindly resending.
+- Use an atomic unique notification key built from deployment key, register identity, item identity, review cycle, reminder rule, and intended recipient. Retry known failures safely; reconcile ambiguous sends instead of assuming a successful send or blindly resending.
 - Use persisted run state or an equivalent mechanism to avoid relying only on two scheduled start times for refresh/reminder ordering. Recheck eligibility immediately before any authorized send.
-- Record start/end time, environment, flow/run identity, resource mapping version, counts, result, and safe error details in Automation Run History. A source access failure must not appear as successful synchronization.
+- Record start/end time, deployment key, actual Power Platform environment identity, flow/run identity, resource mapping version, counts, result, and safe error details in Automation Run History. A source access failure must not appear as successful synchronization.
 
 ## Completion boundaries
 

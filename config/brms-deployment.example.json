@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "1.0",
+  "schemaVersion": "2.0",
   "artifactType": "planning-example",
   "runtimeReady": false,
   "systemName": "Business Resilience Management System",
@@ -9,184 +9,97 @@
     "implementationStatus": "Scout must implement and validate this contract; current scripts do not read it.",
     "locationResolution": "A null resource siteUrl explicitly inherits defaultResourceSiteUrl. Resolve IDs during discovery. An inaccessible or missing configured target must never fall back to another resource.",
     "sourceResolution": "Each source library has an explicit siteUrl and libraryId. Documents outside configured or supported sources remain governed through DocumentLink and are reported as not automatically monitored.",
-    "configurationAuthority": "One live configuration store per environment. This file is a template/export, not an additional live store.",
+    "configurationAuthority": "One live configuration store for the single BRMS production deployment. This file is a template/export, not an additional live store.",
     "namingStatus": "proposed-if-no-existing-BRMS-convention",
-    "proposedFlowNamePattern": "BRMS - GCT - <Function> - <DEV|PROD>"
+    "proposedFlowNamePattern": "BRMS - GCT - <Function>",
+    "namingConstraint": "Single production deployment. Resource display names must not contain DEV or PROD environment labels."
   },
-  "environments": {
-    "dev": {
-      "powerAutomateEnvironmentId": null,
-      "defaultResourceSiteUrl": "https://reedelsevier.sharepoint.com/sites/ELSBUProjects/BRMS",
-      "businessTimeZone": null,
-      "bootstrap": {
-        "configurationSiteUrl": null,
-        "configurationListId": null,
-        "configurationConnectionBindingKey": null
+  "deployment": {
+    "powerAutomateEnvironmentId": null,
+    "defaultResourceSiteUrl": "https://reedelsevier.sharepoint.com/sites/ELSBUProjects/BRMS",
+    "businessTimeZone": null,
+    "bootstrap": {
+      "configurationSiteUrl": null,
+      "configurationListId": null,
+      "configurationConnectionBindingKey": null
+    },
+    "resources": {
+      "governanceRegister": {
+        "kind": "list",
+        "displayName": "Governance Control Tower",
+        "siteUrl": null,
+        "listOrLibraryId": null,
+        "connectionBindingKey": null,
+        "resolutionStatus": "unverified"
       },
-      "resources": {
-        "governanceRegister": {
-          "kind": "list",
-          "displayName": "Governance Control Tower - DEV",
-          "siteUrl": null,
-          "listOrLibraryId": null,
-          "connectionBindingKey": null,
-          "resolutionStatus": "unverified"
-        },
-        "configuration": {
-          "kind": "list",
-          "displayName": "BRMS Configuration - DEV",
-          "siteUrl": null,
-          "listOrLibraryId": null,
-          "connectionBindingKey": null,
-          "resolutionStatus": "unverified"
-        },
-        "notificationHistory": {
-          "kind": "list",
-          "displayName": "BRMS Notification History - DEV",
-          "siteUrl": null,
-          "listOrLibraryId": null,
-          "connectionBindingKey": null,
-          "resolutionStatus": "unverified"
-        },
-        "automationRunHistory": {
-          "kind": "list",
-          "displayName": "BRMS Automation Run History - DEV",
-          "siteUrl": null,
-          "listOrLibraryId": null,
-          "connectionBindingKey": null,
-          "resolutionStatus": "unverified"
-        }
+      "configuration": {
+        "kind": "list",
+        "displayName": "BRMS Configuration",
+        "siteUrl": null,
+        "listOrLibraryId": null,
+        "connectionBindingKey": null,
+        "resolutionStatus": "unverified"
       },
-      "sourceLibraries": [],
-      "sourceLibraryEntryContract": {
-        "requiredFields": [
-          "sourceKey",
-          "siteUrl",
-          "libraryId",
-          "connectionBindingKey",
-          "monitoringMode",
-          "enabled"
-        ],
-        "optionalFields": [
-          "folderServerRelativeUrl",
-          "displayName",
-          "checkpoint"
-        ],
-        "monitoringMode": "registered-documents-only",
-        "siteUrlMustBeExplicit": true
+      "notificationHistory": {
+        "kind": "list",
+        "displayName": "BRMS Notification History",
+        "siteUrl": null,
+        "listOrLibraryId": null,
+        "connectionBindingKey": null,
+        "resolutionStatus": "unverified"
       },
-      "flows": {
-        "enabled": false,
-        "refreshScheduleLocal": null,
-        "reminderScheduleLocal": null,
-        "sourceMonitorScheduleLocal": null
-      },
-      "notifications": {
-        "mode": "preview",
-        "testRecipients": [],
-        "reminderOffsetsDays": [],
-        "overdueRepeatDays": null,
-        "recipientRule": null,
-        "configurationStatus": "unresolved"
-      },
-      "reviewRules": {
-        "calendarMonthsByFrequency": {
-          "Monthly": 1,
-          "Quarterly": 3,
-          "Semi-Annual": 6,
-          "Annual": 12
-        },
-        "dueSoonMaximumDays": 30,
-        "overdueWhenDaysBelow": 0,
-        "sourceModificationCompletesReview": false
+      "automationRunHistory": {
+        "kind": "list",
+        "displayName": "BRMS Automation Run History",
+        "siteUrl": null,
+        "listOrLibraryId": null,
+        "connectionBindingKey": null,
+        "resolutionStatus": "unverified"
       }
     },
-    "prod": {
-      "powerAutomateEnvironmentId": null,
-      "defaultResourceSiteUrl": "https://reedelsevier.sharepoint.com/sites/ELSBUProjects/BRMS",
-      "businessTimeZone": null,
-      "bootstrap": {
-        "configurationSiteUrl": null,
-        "configurationListId": null,
-        "configurationConnectionBindingKey": null
+    "sourceLibraries": [],
+    "sourceLibraryEntryContract": {
+      "requiredFields": [
+        "sourceKey",
+        "siteUrl",
+        "libraryId",
+        "connectionBindingKey",
+        "monitoringMode",
+        "enabled"
+      ],
+      "optionalFields": [
+        "folderServerRelativeUrl",
+        "displayName",
+        "checkpoint"
+      ],
+      "monitoringMode": "registered-documents-only",
+      "siteUrlMustBeExplicit": true
+    },
+    "flows": {
+      "enabled": false,
+      "refreshScheduleLocal": null,
+      "reminderScheduleLocal": null,
+      "sourceMonitorScheduleLocal": null
+    },
+    "notifications": {
+      "mode": "preview",
+      "testRecipients": [],
+      "reminderOffsetsDays": [],
+      "overdueRepeatDays": null,
+      "recipientRule": null,
+      "configurationStatus": "unresolved"
+    },
+    "reviewRules": {
+      "calendarMonthsByFrequency": {
+        "Monthly": 1,
+        "Quarterly": 3,
+        "Semi-Annual": 6,
+        "Annual": 12
       },
-      "resources": {
-        "governanceRegister": {
-          "kind": "list",
-          "displayName": "Governance Control Tower",
-          "siteUrl": null,
-          "listOrLibraryId": null,
-          "connectionBindingKey": null,
-          "resolutionStatus": "unverified"
-        },
-        "configuration": {
-          "kind": "list",
-          "displayName": "BRMS Configuration",
-          "siteUrl": null,
-          "listOrLibraryId": null,
-          "connectionBindingKey": null,
-          "resolutionStatus": "unverified"
-        },
-        "notificationHistory": {
-          "kind": "list",
-          "displayName": "BRMS Notification History",
-          "siteUrl": null,
-          "listOrLibraryId": null,
-          "connectionBindingKey": null,
-          "resolutionStatus": "unverified"
-        },
-        "automationRunHistory": {
-          "kind": "list",
-          "displayName": "BRMS Automation Run History",
-          "siteUrl": null,
-          "listOrLibraryId": null,
-          "connectionBindingKey": null,
-          "resolutionStatus": "unverified"
-        }
-      },
-      "sourceLibraries": [],
-      "sourceLibraryEntryContract": {
-        "requiredFields": [
-          "sourceKey",
-          "siteUrl",
-          "libraryId",
-          "connectionBindingKey",
-          "monitoringMode",
-          "enabled"
-        ],
-        "optionalFields": [
-          "folderServerRelativeUrl",
-          "displayName",
-          "checkpoint"
-        ],
-        "monitoringMode": "registered-documents-only",
-        "siteUrlMustBeExplicit": true
-      },
-      "flows": {
-        "enabled": false,
-        "refreshScheduleLocal": null,
-        "reminderScheduleLocal": null,
-        "sourceMonitorScheduleLocal": null
-      },
-      "notifications": {
-        "mode": "preview",
-        "testRecipients": [],
-        "reminderOffsetsDays": [],
-        "overdueRepeatDays": null,
-        "recipientRule": null,
-        "configurationStatus": "unresolved"
-      },
-      "reviewRules": {
-        "calendarMonthsByFrequency": {
-          "Monthly": 1,
-          "Quarterly": 3,
-          "Semi-Annual": 6,
-          "Annual": 12
-        },
-        "dueSoonMaximumDays": 30,
-        "overdueWhenDaysBelow": 0,
-        "sourceModificationCompletesReview": false
-      }
-    }
+      "dueSoonMaximumDays": 30,
+      "overdueWhenDaysBelow": 0,
+      "sourceModificationCompletesReview": false
+    },
+    "deploymentPurpose": "production"
   }
 }
