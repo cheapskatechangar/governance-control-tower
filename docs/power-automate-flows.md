@@ -8,6 +8,16 @@
 
 This document tracks all Power Automate flows required to support Governance Control Tower.
 
+## BRMS flow requirements
+
+- Target SharePoint site: `https://reedelsevier.sharepoint.com/sites/ELSBUProjects/BRMS`.
+- Build and adapt flows using BRMS patterns. Obtain an existing BRMS flow export or the team's pattern documentation to establish the exact conventions.
+- Record the reference's flow naming, target Power Automate environment, solution organization if used, connection setup, configuration, logging, error handling, and notification conventions. Where the reference does not define a convention, record it as unresolved.
+- Map every SharePoint action and trigger to its intended BRMS list or library. Dependencies listed below are source references; their BRMS names, locations, and availability must be verified.
+- Record the BRMS flow name and its source flow when adapting each flow. Validate schedules, time zones, reminder recipients, and suppression rules for the BRMS deployment.
+
+The inventory below describes source flows. Its `CT - ...` names are reference names, not confirmed BRMS deployment names. `Existing` and `In Progress` describe the source inventory and do not establish that any flow is deployed in BRMS.
+
 
 
 \## Flow Inventory
@@ -83,4 +93,3 @@ For each flow, document:
 \- TR Notification History
 
 \- Power BI dashboard connections
-

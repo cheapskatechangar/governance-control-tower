@@ -24,7 +24,9 @@
 
 
 
-\- \[ ] Confirm target SharePoint site
+- [x] Record target SharePoint site: `https://reedelsevier.sharepoint.com/sites/ELSBUProjects/BRMS`
+
+- [ ] Verify access to the BRMS site and inspect existing lists/libraries before creating resources
 
 \- \[ ] Create DEV list
 
@@ -67,6 +69,12 @@
 
 
 \- \[ ] Export existing flows
+
+- [ ] Obtain an existing BRMS flow export or documented BRMS patterns
+
+- [ ] Document the BRMS flow naming, environment, solution, connections, configuration, logging, error handling, and notification conventions
+
+- [ ] Map source flows and supporting lists/libraries to their BRMS targets
 
 \- \[ ] Document triggers
 
@@ -113,4 +121,3 @@
 \- \[ ] Confirm exception links
 
 \- \[ ] Communicate rollout
-
