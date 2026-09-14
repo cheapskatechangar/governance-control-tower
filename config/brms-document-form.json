@@ -1,0 +1,36 @@
+{
+  "sections": [
+    {
+      "displayname": "1. Document Details",
+      "fields": [
+        "Document Name",
+        "Document Link",
+        "Document Type",
+        "Department"
+      ]
+    },
+    {
+      "displayname": "2. Assignment & Accountability",
+      "fields": [
+        "Owner",
+        "Reviewer",
+        "Notes"
+      ]
+    },
+    {
+      "displayname": "ACTION REQUIRED: UPDATE REVIEW DATE",
+      "fields": [
+        "Last Reviewed Date"
+      ]
+    },
+    {
+      "displayname": "3. Review Schedule (System Calculated)",
+      "fields": [
+        "Review Frequency",
+        "Next Review Due",
+        "Status",
+        "Days to Review"
+      ]
+    }
+  ]
+}
