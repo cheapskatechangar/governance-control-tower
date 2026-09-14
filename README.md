@@ -16,6 +16,7 @@ Give Scout [the complete BRMS build instructions](docs/brms-scout-build-instruct
 | [Setup guide](docs/setup-guide.md) | List, form, views, and distributed resource setup |
 | [Flow specifications](docs/power-automate-flows.md) | BRMS review refresher, reminders, and source monitoring |
 | [Deployment checklist](docs/deployment-checklist.md) | Build and acceptance criteria |
+| [Loop project workspace](docs/brms-loop-project-workspace.md) | Progress, decisions, blockers, live resource URLs, flow inventory, and update cadence |
 | [Deployment example](config/brms-deployment.example.json) | Planning template for independently located resources |
 | [Form layout](config/brms-document-form.json) | Four-section list form from the supplied guide |
 
@@ -36,6 +37,8 @@ Retain the guide's baseline schema when inspecting the list the team may already
 The current scripts install prerequisites and attempt to create a single list. They do not implement the document schema, views, form, supporting lists, or flows. The connection helper can skip authentication while the deployment wrapper continues. Scout must validate connectivity and correct that behavior before using those scripts for deployment.
 
 No live BRMS build, resource inspection, or flow test is established by these repository files. Scout must record actual resource IDs, flow IDs, run evidence, and remaining blockers in the deployment handoff.
+
+The user has designated the existing `Governance Control Tower implementation` Loop page as the team's project overview and status page. Scout must maintain it throughout the build and create linked detail pages only when useful. Use the exact page link supplied in the task; keep the authenticated workspace link in the restricted project handoff rather than this public repository. A milestone handoff must say whether its Loop update was saved or remains pending.
 
 ## Deployment conventions
 

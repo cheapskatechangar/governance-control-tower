@@ -9,6 +9,7 @@
 - [ ] Identify the actual Power Automate environment, existing BRMS flow conventions, and usable connections.
 - [ ] Inventory configured source libraries, including sources outside the home site.
 - [ ] Record schema differences and unresolved business rules without changing populated fields blindly.
+- [ ] Open the user-supplied implementation Loop page; inspect existing content, preserve contributions, and identify the current overview and relevant detail pages.
 
 ## Configuration and SharePoint
 
@@ -43,3 +44,14 @@
 - [ ] Record run evidence, resource/flow inventories, deployment steps, and rollback steps.
 - [ ] Keep real-recipient communications and production cutover pending explicit rollout authorization.
 - [ ] Report exact remaining dependencies; distinguish documented, created, tested, and enabled states.
+
+## Loop project reporting
+
+- [ ] Use the existing implementation page as one project overview/status page with owner, last update, current phase, milestones, next actions, and top blockers.
+- [ ] Reuse or create linked detail pages only where useful for build progress, decisions/blockers, resource/flow inventory, and testing/handoff.
+- [ ] Record confirmed decisions separately from proposals, with decision maker, rationale, date, and affected work.
+- [ ] Track each blocker with impact, next action, resolution owner, state, and closure evidence; do not delete resolved history.
+- [ ] Record actual site/list/library URLs and IDs and exact flow names, IDs, management URLs, environments, operating states, and last verification.
+- [ ] Update relevant entries after each milestone, test, decision, blocker change, or resource change, then refresh the overview.
+- [ ] Verify Loop saves before claiming the page is updated; record a pending update if access or saving fails.
+- [ ] Include updated Loop page links and remaining actions in the session handoff.

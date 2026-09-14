@@ -11,7 +11,9 @@ Build the Business Resilience Management System (BRMS) deployment of Governance 
 - The guide's body labels itself Version 1.0, prepared August 28, 2026. Its explicit scope is document governance. The older RTO, immutable backup, recovery testing, and blue/green material is preserved in `docs/legacy/technical-resilience/` for historical reference. Do not build those modules for this deployment. Playbook remains a valid document type.
 - Use existing BRMS Power Automate patterns where found. If no pattern is available, proceed with the provisional flow name `BRMS - GCT - <Function> - <DEV|PROD>` and record the assumption.
 
-Read `README.md`, `docs/field-schema.md`, `docs/setup-guide.md`, `docs/power-automate-flows.md`, `docs/deployment-checklist.md`, `config/brms-document-form.json`, and `config/brms-deployment.example.json` before building. These active documents supersede the legacy scope. Apply the user's latest directions if they change this brief.
+Read `README.md`, `docs/field-schema.md`, `docs/setup-guide.md`, `docs/power-automate-flows.md`, `docs/deployment-checklist.md`, `docs/brms-loop-project-workspace.md`, `config/brms-document-form.json`, and `config/brms-deployment.example.json` before building. These active documents supersede the legacy scope. Apply the user's latest directions if they change this brief.
+
+Maintain the user-supplied `Governance Control Tower implementation` Loop page as the team's project overview and status page throughout the build. The user has authorized updating that page and creating linked pages when useful. Follow `docs/brms-loop-project-workspace.md` for structure, required data, update cadence, and verification. Record progress, decisions, blockers, actual resource URLs, and exact Power Automate names/IDs as work happens; documentation is part of each milestone.
 
 ## 1. Inspect what already exists
 
@@ -134,6 +136,8 @@ Relocation means configuration plus controlled rebind/redeployment and validatio
 
 ## 6. Repository updates, handoff, and completion
 
+At the start of each work session, read the Loop overview and relevant detail pages before resuming. After each meaningful milestone, test result, decision, blocker change, or resource/flow change, update the appropriate existing entries and refresh the overview. Before each handoff, verify the saved changes and provide direct links to the pages updated. Distinguish project work completed from a Loop update that could not be saved. If Loop is inaccessible, prepare the exact pending update, report that specific blocker, and continue independent build work.
+
 Create or reuse a BRMS work branch such as `scout/brms-build`, commit meaningful milestones, and preserve unrelated work. Keep the active docs aligned with actual implementation. Add reusable sanitized flow exports, schema/form/view definitions, configuration schema and example, deployment/rebind steps, verification results, and operator instructions.
 
 This repository is public. Keep secrets, credentials, actual employee recipient lists, controlled document contents, and populated operational exports in the access-controlled BRMS location. Commit sanitized examples and a description of where operators maintain the restricted configuration/evidence. Do not upload a source solution export until its contents have been checked for embedded organizational data.
@@ -144,4 +148,4 @@ Include the exact procedure to add a source library, relocate a resource, change
 
 Proceed autonomously through the available reversible build and test work. If access, a required business setting, or a missing source artifact blocks one component, state the exact dependency and affected component, continue independent work, and group remaining questions into one concise handoff. Do not repeatedly request confirmation for routine implementation choices.
 
-The requested outcome is a working BRMS document register, usable forms/views/home navigation, configurable resource mappings, the three implemented flows, operational history, test evidence including distributed-location verification when access permits, and a documented path to enable authorized production communications.
+The requested outcome is a working BRMS document register, usable forms/views/home navigation, configurable resource mappings, the three implemented flows, operational history, test evidence including distributed-location verification when access permits, a current linked Loop project workspace, and a documented path to enable authorized production communications.
