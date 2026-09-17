@@ -1,27 +1,51 @@
-# BRMS Power Automate creation status
+# BRMS Power Automate implementation and creation status
 
-## Current blocker evidence
+BRMS implementation defects are corrected in the generator and tests. The live cloud-flow creation blocker is separate and unchanged.
 
-The SharePoint resources exist and should be preserved:
+## Implementation corrections (in this commit)
 
-- Governance Control Tower
-- BRMS Configuration
-- BRMS Notification History
-- BRMS Automation Run History
+| # | Correction | Evidence |
+|---|---|---|
+| 1 | Source site addresses and file paths resolve from configured mappings, not naive URL split. | `New-SourceMonitorWorkflow` reads `source-library-map-v1`, filters by `matchPrefix`, and composes `Compose_resolved_site` + `Compose_document_path` from the matched mapping. Unresolved sources append to `SkippedReferences` with reason `source-not-in-configured-map`. |
+| 2 | Run success/failure counts and errors are calculated per-item and persisted. | Every workflow initializes `SuccessCount`, `FailureCount`, `FailedReferences`, `SanitizedErrors`, and `SkippedReferences`, uses `IncrementVariable`/`AppendToArrayVariable` on the outcome runAfter branches, and posts `@variables('SuccessCount')`, `@variables('FailureCount')`, and joined error/reference arrays to BRMS Automation Run History. |
+| 3 | BRMS Configuration is read and validated at runtime. | Every workflow calls `Get_configuration` with paginated `GetItems`, `Compose_configuration_map`, `Validate_configuration` (terminates run when `review-rules-v1` or `notification-settings-v1` are missing), and parses `Parse_review_rules`/`Parse_notification_settings`. The refresh flow reads `calendarMonthsByFrequency` and `dueSoonMaximumDays` from configuration. |
+| 4 | Reminders require a successful, current refresh before processing, recheck eligibility per record, and handle duplicate-create conflicts. | Reminder flow calls `Get_last_successful_refresh` from Automation Run History filtered to today's business boundary and terminates with `Record_refresh_gate_block` + `Terminate_no_refresh` when no successful refresh exists. Inside `For_each_due_document`, `Reread_current_document` + `Recheck_eligibility` protect against stale reads, and `Recover_duplicate_conflict` re-queries the notification key on create failure to reuse the existing preview row. |
+| 5 | Retry policy placement corrected and pagination beyond 5,000 records enabled. | `New-OpenApiAction` places `retryPolicy` under `inputs` and pagination under `runtimeConfiguration.paginationPolicy` with `minimumItemCount = 100000`. Regression tests assert `runtimeConfiguration.retryPolicy` is not present anywhere in the generated definitions. |
+| 6 | Records are revalidated before updates. | Refresh and source monitor call `Reread_current_document` before every patch. Refresh compares `Active` + `Modified` against the item snapshot from `Get_active_documents` before applying the patch. Source monitor gates the update on `Check_still_active`. |
+| 7 | Focused tests now detect these defects. | `tests/Test-BrmsFlowArtifacts.ps1` fails on the reviewed commit `017321bcf01c1d35ffbaed57e33fced4549e03cd` (reproduced) and passes on the corrected generator. |
 
-Cloud flow creation is not blocked by missing SharePoint lists or missing maker portal access. The maker portal opened in the selected Power Platform environment and exposed Create from blank, Save draft, Publish, connected SharePoint connections, operation group metadata calls, and flow listing.
+## Package artifacts
 
-Observed blockers:
+| Field | Value |
+|---|---|
+| Solution unique name | `BRMSGovernanceControlTower` |
+| Solution display name | `BRMS Governance Control Tower` |
+| Solution version | `1.0.0.3` |
+| Generator | `scripts/New-BrmsFlowSolution.ps1` |
+| Test harness | `tests/Test-BrmsFlowArtifacts.ps1` |
+| Package validation | Local artifact tests pass on this commit |
 
-1. `pac power-automate` is inspection-only in the installed CLI version. Its help exposes `list-cloud-flows`, `list-flow-actions`, and `list-flow-runs`; it does not expose a create/update/publish command.
-2. The repository had no valid solution ZIP or `.cdsproj`, so solution import was not initially a valid creation path.
-3. Maker-designer Copilot created only a recurrence/control draft and returned a connector-generation issue: it did not recognize the SharePoint connector name even though tenant flow exports and `pac connection list` show `/providers/Microsoft.PowerApps/apis/shared_sharepointonline` as the standard connector.
-4. The original generated unmanaged solution package could be parsed by `pac solution create-settings` and produced the expected SharePoint connection reference. Import then failed before creating any flow with: "An error occurred while trying to run solution checker enforcement on the importing solution."
-5. A separate `pac solution check` call uploaded the package to Power Apps Checker but stayed at "Analyzing; PercentComplete: 30" for more than seven minutes and had to be stopped. This indicates the active blocker is solution-checker/enforcement tooling for package import, not SharePoint list availability.
-6. After the package generator was completed with the full BRMS flow action structure, retry/pagination metadata, independent resource-map parameters, preview-only reminder behavior, and source-monitoring actions, `pac solution import --async --max-async-wait-time 10` started async operation `93058e94-8cb0-f111-aaac-70a8a5af0770`. The operation failed after about 6 minutes 45 seconds with the same solution-checker enforcement message and created no BRMS flows.
-7. The normal maker designer action picker was tested separately from Copilot. It opened and found the standard SharePoint connector with SharePoint triggers/actions, so the connector is available in the designer. Completing all three BRMS flows manually in the designer remains an interactive maker task unless solution import succeeds.
+The bound settings file and the generated ZIP are produced outside the repository so credentials and connection IDs are not committed.
 
-No active cloud flow currently references the recycled DEV-suffixed list IDs.
+## Live cloud-flow creation blocker (unchanged)
+
+The implementation corrections above do not lift the live creation blocker recorded previously.
+
+| Field | Value |
+|---|---|
+| Environment | `RIS-TechCentral-Low-DEV` / `722e9526-2b55-e3b0-8bfb-e4475649af19` |
+| Import path attempted | `pac solution import --async` with the completed package |
+| Result | Failed at Power Platform solution checker enforcement before creating any flow |
+| Async operation ID | `93058e94-8cb0-f111-aaac-70a8a5af0770` |
+| Error | `An error occurred while trying to run solution checker enforcement on the importing solution. Try importing the solution again. If this problem persists, contact your system administrator.` |
+| Post-check | `pac power-automate list-cloud-flows` still returns zero `BRMS - GCT - ...` flows |
+
+Preserved SharePoint resources continue unchanged:
+
+- Governance Control Tower `249e7c48-b75e-4b14-9ff0-eb00a854111a`
+- BRMS Configuration `8a5524c7-01bd-4608-899f-62281313a8c6`
+- BRMS Notification History `ef96f9df-2e83-4040-9201-da4e8087918f`
+- BRMS Automation Run History `f0f62faf-86bb-4257-9c0d-f4f8571e71e2`
 
 ## Prepared flow names
 
@@ -29,20 +53,14 @@ No active cloud flow currently references the recycled DEV-suffixed list IDs.
 - BRMS - GCT - Review Reminders
 - BRMS - GCT - Source Document Monitor
 
-Outbound reminders must remain in preview until rollout is explicitly authorized.
+Outbound reminders remain preview-only until rollout is explicitly authorized.
 
-## Prepared package generator
+## What remains for BRMS completion
 
-Use `scripts/New-BrmsFlowSolution.ps1` to generate an unmanaged solution package from live list IDs. Run `pac solution create-settings` against the ZIP, populate the SharePoint connection ID, then import in the target environment. If the same checker-enforcement failure occurs, import requires a maker/admin action to resolve the environment checker policy or run the import from the maker portal with the generated ZIP and selected SharePoint connection.
+BRMS is not complete until the corrected package is imported and the three flows perform their required behavior with verified execution evidence:
 
-The generator now emits all three unsuffixed BRMS flows, not only scheduled read scaffolds. It includes:
-
-- independent resource-map parameters for the register, configuration, notification history, automation run history, and default source site;
-- daily recurrence triggers with single-run concurrency;
-- SharePoint action retry policies and `$top=5000` page-size hints;
-- Review Schedule Refresh logic for Monthly, Quarterly, Semi-Annual, and Annual review cycles;
-- preview-only Review Reminders with deterministic `NotificationKey` duplicate suppression and no outbound send action;
-- Source Document Monitor actions that read registered document links and update only `SourceModifiedDate`; and
-- Automation Run History writes for each flow.
-
-Local artifact validation is in `tests/Test-BrmsFlowArtifacts.ps1`.
+1. Maker/admin resolves the solution-checker enforcement failure or imports the package manually through the maker portal with the `cr1e9_BRMSSharePoint` connection reference bound to the standard SharePoint connection.
+2. Populate the BRMS Configuration list with the runtime keys the flows now consume (`review-rules-v1`, `notification-settings-v1`, `source-library-map-v1`).
+3. Test Review Schedule Refresh against the synthetic BRMS records, confirm actual writes to `NextReviewDue`, `DaysToReview`, and `Status`, and record the flow ID, management URL, and run IDs.
+4. Run reminders against the same records; confirm preview rows in `BRMS Notification History` with `Preview` outcome, refresh-gate skips when refresh has not run, and duplicate suppression across repeated runs.
+5. Run Source Document Monitor against a document that matches a configured `source-library-map` entry and one that does not, and confirm `SourceModifiedDate` updates only for matched, resolvable sources.

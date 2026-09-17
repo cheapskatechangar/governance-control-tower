@@ -2,7 +2,7 @@
 
 ## Target environment
 
-The selected Power Platform environment is administrative metadata only. BRMS artifacts must remain unsuffixed.
+Administrative metadata only. BRMS artifacts must remain unsuffixed.
 
 | Field | Value |
 |---|---|
@@ -11,6 +11,7 @@ The selected Power Platform environment is administrative metadata only. BRMS ar
 | Environment URL | `https://org734d2f31.crm.dynamics.com` |
 | Solution unique name | `BRMSGovernanceControlTower` |
 | Solution display name | `BRMS Governance Control Tower` |
+| Solution version | `1.0.0.3` |
 
 ## Preserved BRMS resources
 
@@ -21,9 +22,19 @@ The selected Power Platform environment is administrative metadata only. BRMS ar
 | BRMS Notification History | `ef96f9df-2e83-4040-9201-da4e8087918f` | `https://reedelsevier.sharepoint.com/sites/ELSBUProjects/BRMS` |
 | BRMS Automation Run History | `f0f62faf-86bb-4257-9c0d-f4f8571e71e2` | `https://reedelsevier.sharepoint.com/sites/ELSBUProjects/BRMS` |
 
+## Required BRMS Configuration keys
+
+The corrected flows read and validate these Configuration rows at runtime. Missing rows cause `Terminate_missing_configuration` to fail the run.
+
+| ConfigKey | Kind | Value contract |
+|---|---|---|
+| `review-rules-v1` | ReviewRules | `{ "calendarMonthsByFrequency": { "Monthly": 1, "Quarterly": 3, "Semi-Annual": 6, "Annual": 12 }, "dueSoonMaximumDays": 30 }` |
+| `notification-settings-v1` | NotificationSettings | `{ "mode": "preview", "outboundRemindersEnabled": false }` (reminders remain preview-only regardless) |
+| `source-library-map-v1` | SourceLibraryMap | JSON array of `{ "sourceKey": string, "siteUrl": string, "siteServerRelativePath": string, "folderServerRelativeUrl": string, "matchPrefix": string }` entries. `matchPrefix` is matched case-insensitively against the register's `DocumentLink` URL. |
+
 ## Package generation
 
-Generate the package outside the repository so the ZIP and connection-bound settings are not committed:
+Run the generator outside the repository so the ZIP and connection-bound settings are not committed:
 
 ```powershell
 .\scripts\New-BrmsFlowSolution.ps1 `
@@ -40,43 +51,25 @@ Generate the package outside the repository so the ZIP and connection-bound sett
   -OutputDirectory '<restricted-output-folder>'
 ```
 
-Validated package from the current run:
-
-| Field | Value |
-|---|---|
-| Package file | `BRMSGovernanceControlTower.zip` |
-| Solution version | `1.0.0.2` |
-| SHA-256 | `a4958c6f2feca6e87ed78b77cb9f532aa3496a7d2620f0f0af3ff95001fed475` |
-| Validation | `tests/Test-BrmsFlowArtifacts.ps1` passed |
+The generator prints the ZIP path, SHA-256, and solution version. Report the resulting hash in the deployment record; the ZIP itself is not committed.
 
 ## Required connection-reference binding
 
-Run `pac solution create-settings --solution-zip BRMSGovernanceControlTower.zip --settings-file settings.json`, then bind:
+`pac solution create-settings --solution-zip BRMSGovernanceControlTower.zip --settings-file settings.json`, then bind:
 
 | Logical name | Connector ID | Required binding |
 |---|---|---|
-| `cr1e9_BRMSSharePoint` | `/providers/Microsoft.PowerApps/apis/shared_sharepointonline` | Existing connected SharePoint connection with access to the BRMS site and any configured source sites |
+| `cr1e9_BRMSSharePoint` | `/providers/Microsoft.PowerApps/apis/shared_sharepointonline` | Existing connected SharePoint connection with access to the BRMS site and all configured source sites |
 
 ## Import status
 
-The completed package was retried with `pac solution import --async --max-async-wait-time 10` in environment `722e9526-2b55-e3b0-8bfb-e4475649af19`.
-
-| Field | Value |
-|---|---|
-| Async operation ID | `93058e94-8cb0-f111-aaac-70a8a5af0770` |
-| Result | Failed before creating BRMS flows |
-| Error | `An error occurred while trying to run solution checker enforcement on the importing solution. Try importing the solution again. If this problem persists, contact your system administrator.` |
-| Observed duration | Approximately 6 minutes 45 seconds |
-| Post-check | `pac power-automate list-cloud-flows` found zero `BRMS - GCT - ...` flows |
+Import remains blocked at Power Platform solution-checker enforcement. See `docs/flow-creation-status.md` for the recorded async operation ID, error text, and post-check results. The implementation corrections in this commit do not change the import result.
 
 ## Maker/admin action required
 
-Resolve the environment's solution-checker enforcement failure or import the package through the Power Automate maker portal in the selected environment with the `BRMS SharePoint` connection reference bound to the SharePoint connector connection.
-
-After import:
-
-1. Confirm the three flows exist with these exact names: `BRMS - GCT - Review Schedule Refresh`, `BRMS - GCT - Review Reminders`, and `BRMS - GCT - Source Document Monitor`.
-2. Keep reminders in preview; do not add an outbound email or Teams send action until rollout is approved.
-3. Test Review Schedule Refresh first against the synthetic records in `Governance Control Tower`.
-4. Verify actual updates to `NextReviewDue`, `DaysToReview`, and `Status`, then run reminder preview and source monitoring.
-5. Record flow IDs, management URLs, run IDs, run results, list changes, notification preview rows, source observations, and Automation Run History rows in the Loop workspace.
+1. Resolve the environment's solution-checker enforcement failure or import the package through the Power Automate maker portal with the `cr1e9_BRMSSharePoint` connection reference bound to the SharePoint connector connection.
+2. Populate `review-rules-v1`, `notification-settings-v1`, and `source-library-map-v1` rows in BRMS Configuration.
+3. Confirm the three flows exist with these exact names: `BRMS - GCT - Review Schedule Refresh`, `BRMS - GCT - Review Reminders`, `BRMS - GCT - Source Document Monitor`.
+4. Keep reminders in preview; do not add outbound send actions until rollout is approved.
+5. Test Review Schedule Refresh against the synthetic records in `Governance Control Tower`, verify writes to `NextReviewDue`, `DaysToReview`, and `Status`, then run reminders and source monitoring in that order.
+6. Record flow IDs, management URLs, run IDs, run results, list changes, notification preview rows, source observations, and Automation Run History rows in the Loop workspace.
