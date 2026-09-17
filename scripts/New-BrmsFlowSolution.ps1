@@ -36,7 +36,7 @@ param (
     [string]$BusinessTimeZone = 'Eastern Standard Time',
     [string]$SolutionUniqueName = 'BRMSGovernanceControlTower',
     [string]$SolutionDisplayName = 'BRMS Governance Control Tower',
-    [string]$SolutionVersion = '1.0.0.3',
+    [string]$SolutionVersion = '1.0.0.4',
     [string]$PublisherUniqueName = 'Cr115e7',
     [string]$PublisherDisplayName = 'CDS Default Publisher',
     [string]$PublisherPrefix = 'cr1e9',
@@ -177,7 +177,7 @@ function New-ClientData {
                 shared_sharepointonline = [ordered]@{
                     api = @{ name = 'shared_sharepointonline' }
                     connection = @{ connectionReferenceLogicalName = $ConnectionReferenceLogicalName }
-                    runtimeSource = 'embedded'
+                    runtimeSource = 'invoker'
                 }
             }
             definition = [ordered]@{
@@ -187,18 +187,6 @@ function New-ClientData {
                 parameters = [ordered]@{
                     '$authentication' = @{ defaultValue = @{}; type = 'SecureObject' }
                     '$connections' = @{ defaultValue = @{}; type = 'Object' }
-                    brmsRegisterSiteUrl = @{ defaultValue = $RegisterSiteUrl; type = 'String' }
-                    brmsRegisterListId = @{ defaultValue = $RegisterListId; type = 'String' }
-                    brmsConfigurationSiteUrl = @{ defaultValue = $ConfigurationSiteUrl; type = 'String' }
-                    brmsConfigurationListId = @{ defaultValue = $ConfigurationListId; type = 'String' }
-                    brmsNotificationHistorySiteUrl = @{ defaultValue = $NotificationHistorySiteUrl; type = 'String' }
-                    brmsNotificationHistoryListId = @{ defaultValue = $NotificationHistoryListId; type = 'String' }
-                    brmsAutomationRunHistorySiteUrl = @{ defaultValue = $AutomationRunHistorySiteUrl; type = 'String' }
-                    brmsAutomationRunHistoryListId = @{ defaultValue = $AutomationRunHistoryListId; type = 'String' }
-                    brmsDefaultSourceSiteUrl = @{ defaultValue = $DefaultSourceSiteUrl; type = 'String' }
-                    brmsDefaultSourceServerRelativeSitePath = @{ defaultValue = $DefaultSourceServerRelativeSitePath.TrimEnd('/'); type = 'String' }
-                    brmsBusinessTimeZone = @{ defaultValue = $BusinessTimeZone; type = 'String' }
-                    brmsDeploymentKey = @{ defaultValue = 'BRMS'; type = 'String' }
                 }
                 triggers = $Triggers
                 actions = $Actions
@@ -218,8 +206,8 @@ function Add-ConfigurationBootstrap {
         [switch]$IncludeSourceLibraryMap
     )
     $Actions['Get_configuration'] = New-OpenApiAction -OperationId 'GetItems' -Parameters @{
-        dataset = "@parameters('brmsConfigurationSiteUrl')"
-        table = "@parameters('brmsConfigurationListId')"
+        dataset = "$($ConfigurationSiteUrl)"
+        table = "$($ConfigurationListId)"
         '$filter' = "Enabled eq 1 and (ConfigKey eq 'review-rules-v1' or ConfigKey eq 'notification-settings-v1' or ConfigKey eq 'source-library-map-v1')"
         '$top' = 200
     } -Paginate
@@ -263,8 +251,8 @@ function New-RunHistoryPost {
         [string]$SanitizedErrorsExpression
     )
     New-OpenApiAction -OperationId 'PostItem' -RunAfter $RunAfter -Parameters @{
-        dataset = "@parameters('brmsAutomationRunHistorySiteUrl')"
-        table = "@parameters('brmsAutomationRunHistoryListId')"
+        dataset = "$($AutomationRunHistorySiteUrl)"
+        table = "$($AutomationRunHistoryListId)"
         'item/Title' = "@concat('$Function ', utcNow())"
         'item/RunKey' = "@concat('BRMS-', guid())"
         'item/AutomationFunction' = $Function
@@ -285,8 +273,8 @@ function New-RefreshWorkflow {
     $flowName = 'BRMS - GCT - Review Schedule Refresh'
     $forEachActions = [ordered]@{
         Reread_current_document = New-OpenApiAction -OperationId 'GetItem' -RunAfter @{} -Parameters @{
-            dataset = "@parameters('brmsRegisterSiteUrl')"
-            table = "@parameters('brmsRegisterListId')"
+            dataset = "$($RegisterSiteUrl)"
+            table = "$($RegisterListId)"
             id = "@items('For_each_active_document')?['ID']"
         }
         Check_eligibility = [ordered]@{
@@ -301,12 +289,12 @@ function New-RefreshWorkflow {
                     Compose_review_frequency = New-Compose -Inputs "@coalesce(outputs('Reread_current_document')?['body/ReviewFrequency']?['Value'], outputs('Reread_current_document')?['body/ReviewFrequency'])"
                     Compose_months_to_add = New-Compose -RunAfter @{ Compose_review_frequency = @('Succeeded') } -Inputs "@int(coalesce(outputs('Parse_review_rules')?['calendarMonthsByFrequency']?[outputs('Compose_review_frequency')],0))"
                     Compose_next_due = New-Compose -RunAfter @{ Compose_months_to_add = @('Succeeded') } -Inputs "@if(or(empty(outputs('Reread_current_document')?['body/LastReviewedDate']),equals(outputs('Compose_months_to_add'),0)),null,formatDateTime(addToTime(outputs('Reread_current_document')?['body/LastReviewedDate'],outputs('Compose_months_to_add'),'Month'),'yyyy-MM-dd'))"
-                    Compose_today_local = New-Compose -RunAfter @{ Compose_next_due = @('Succeeded') } -Inputs "@formatDateTime(convertTimeZone(utcNow(),'UTC',parameters('brmsBusinessTimeZone')),'yyyy-MM-dd')"
+                    Compose_today_local = New-Compose -RunAfter @{ Compose_next_due = @('Succeeded') } -Inputs "@formatDateTime(convertTimeZone(utcNow(),'UTC',$($BusinessTimeZone)),'yyyy-MM-dd')"
                     Compose_days_to_review = New-Compose -RunAfter @{ Compose_today_local = @('Succeeded') } -Inputs "@if(empty(outputs('Compose_next_due')),null,div(sub(ticks(outputs('Compose_next_due')),ticks(outputs('Compose_today_local'))),864000000000))"
                     Compose_status = New-Compose -RunAfter @{ Compose_days_to_review = @('Succeeded') } -Inputs "@if(empty(outputs('Compose_next_due')),'Not Set',if(less(int(outputs('Compose_days_to_review')),0),'Overdue',if(lessOrEquals(int(outputs('Compose_days_to_review')),int(coalesce(outputs('Parse_review_rules')?['dueSoonMaximumDays'],30))),'Due Soon','Current')))"
                     Update_schedule_fields = New-OpenApiAction -OperationId 'PatchItem' -RunAfter @{ Compose_status = @('Succeeded') } -Parameters @{
-                        dataset = "@parameters('brmsRegisterSiteUrl')"
-                        table = "@parameters('brmsRegisterListId')"
+                        dataset = "$($RegisterSiteUrl)"
+                        table = "$($RegisterListId)"
                         id = "@items('For_each_active_document')?['ID']"
                         'item/NextReviewDue' = "@outputs('Compose_next_due')"
                         'item/DaysToReview' = "@outputs('Compose_days_to_review')"
@@ -333,8 +321,8 @@ function New-RefreshWorkflow {
     Add-ConfigurationBootstrap -Actions $actions -LastRunAfter 'Init_skipped_references'
     $actions['Get_configuration'].runAfter = @{ Init_skipped_references = @('Succeeded') }
     $actions['Get_active_documents'] = New-OpenApiAction -OperationId 'GetItems' -RunAfter @{ Parse_notification_settings = @('Succeeded') } -Parameters @{
-        dataset = "@parameters('brmsRegisterSiteUrl')"
-        table = "@parameters('brmsRegisterListId')"
+        dataset = "$($RegisterSiteUrl)"
+        table = "$($RegisterListId)"
         '$filter' = 'Active eq 1'
         '$top' = 5000
     } -Paginate
@@ -358,8 +346,8 @@ function New-ReminderWorkflow {
     $flowName = 'BRMS - GCT - Review Reminders'
     $forEachActions = [ordered]@{
         Reread_current_document = New-OpenApiAction -OperationId 'GetItem' -RunAfter @{} -Parameters @{
-            dataset = "@parameters('brmsRegisterSiteUrl')"
-            table = "@parameters('brmsRegisterListId')"
+            dataset = "$($RegisterSiteUrl)"
+            table = "$($RegisterListId)"
             id = "@items('For_each_due_document')?['ID']"
         }
         Recheck_eligibility = [ordered]@{
@@ -369,10 +357,10 @@ function New-ReminderWorkflow {
             actions = [ordered]@{
                 Compose_review_cycle = New-Compose -Inputs "@formatDateTime(outputs('Reread_current_document')?['body/NextReviewDue'],'yyyy-MM-dd')"
                 Compose_intended_recipient = New-Compose -RunAfter @{ Compose_review_cycle = @('Succeeded') } -Inputs "@coalesce(outputs('Reread_current_document')?['body/Owner']?['Email'], outputs('Reread_current_document')?['body/Reviewer']?['Email'], 'unresolved-recipient')"
-                Compose_notification_key = New-Compose -RunAfter @{ Compose_intended_recipient = @('Succeeded') } -Inputs "@concat(parameters('brmsDeploymentKey'),'|',parameters('brmsRegisterListId'),'|',items('For_each_due_document')?['ID'],'|',outputs('Compose_review_cycle'),'|',coalesce(outputs('Reread_current_document')?['body/Status']?['Value'],outputs('Reread_current_document')?['body/Status']),'|',outputs('Compose_intended_recipient'))"
+                Compose_notification_key = New-Compose -RunAfter @{ Compose_intended_recipient = @('Succeeded') } -Inputs "@concat('BRMS','|',$($RegisterListId),'|',items('For_each_due_document')?['ID'],'|',outputs('Compose_review_cycle'),'|',coalesce(outputs('Reread_current_document')?['body/Status']?['Value'],outputs('Reread_current_document')?['body/Status']),'|',outputs('Compose_intended_recipient'))"
                 Find_existing_notification = New-OpenApiAction -OperationId 'GetItems' -RunAfter @{ Compose_notification_key = @('Succeeded') } -Parameters @{
-                    dataset = "@parameters('brmsNotificationHistorySiteUrl')"
-                    table = "@parameters('brmsNotificationHistoryListId')"
+                    dataset = "$($NotificationHistorySiteUrl)"
+                    table = "$($NotificationHistoryListId)"
                     '$filter' = "NotificationKey eq '@{replace(outputs('Compose_notification_key'),'''','''''')}'"
                     '$top' = 1
                 }
@@ -386,8 +374,8 @@ function New-ReminderWorkflow {
                             type = 'Scope'
                             actions = [ordered]@{
                                 Create_preview_notification = New-OpenApiAction -OperationId 'PostItem' -Parameters @{
-                                    dataset = "@parameters('brmsNotificationHistorySiteUrl')"
-                                    table = "@parameters('brmsNotificationHistoryListId')"
+                                    dataset = "$($NotificationHistorySiteUrl)"
+                                    table = "$($NotificationHistoryListId)"
                                     'item/Title' = "@outputs('Compose_notification_key')"
                                     'item/NotificationKey' = "@outputs('Compose_notification_key')"
                                     'item/RegisterItemIdentity' = "@string(items('For_each_due_document')?['ID'])"
@@ -406,8 +394,8 @@ function New-ReminderWorkflow {
                             type = 'Scope'
                             actions = [ordered]@{
                                 Requery_notification_key = New-OpenApiAction -OperationId 'GetItems' -Parameters @{
-                                    dataset = "@parameters('brmsNotificationHistorySiteUrl')"
-                                    table = "@parameters('brmsNotificationHistoryListId')"
+                                    dataset = "$($NotificationHistorySiteUrl)"
+                                    table = "$($NotificationHistoryListId)"
                                     '$filter' = "NotificationKey eq '@{replace(outputs('Compose_notification_key'),'''','''''')}'"
                                     '$top' = 1
                                 }
@@ -451,10 +439,10 @@ function New-ReminderWorkflow {
     }
     Add-ConfigurationBootstrap -Actions $actions -LastRunAfter 'Init_skipped_references'
     $actions['Get_configuration'].runAfter = @{ Init_skipped_references = @('Succeeded') }
-    $actions['Compose_today_boundary'] = New-Compose -RunAfter @{ Parse_notification_settings = @('Succeeded') } -Inputs "@formatDateTime(convertTimeZone(utcNow(),'UTC',parameters('brmsBusinessTimeZone')),'yyyy-MM-ddT00:00:00Z')"
+    $actions['Compose_today_boundary'] = New-Compose -RunAfter @{ Parse_notification_settings = @('Succeeded') } -Inputs "@formatDateTime(convertTimeZone(utcNow(),'UTC',$($BusinessTimeZone)),'yyyy-MM-ddT00:00:00Z')"
     $actions['Get_last_successful_refresh'] = New-OpenApiAction -OperationId 'GetItems' -RunAfter @{ Compose_today_boundary = @('Succeeded') } -Parameters @{
-        dataset = "@parameters('brmsAutomationRunHistorySiteUrl')"
-        table = "@parameters('brmsAutomationRunHistoryListId')"
+        dataset = "$($AutomationRunHistorySiteUrl)"
+        table = "$($AutomationRunHistoryListId)"
         '$filter' = "AutomationFunction eq 'Review Schedule Refresh' and (RunResult eq 'Succeeded' or RunResult eq 'SucceededWithWarnings') and StartTime ge datetime'@{outputs('Compose_today_boundary')}'"
         '$top' = 1
         '$orderby' = 'StartTime desc'
@@ -470,8 +458,8 @@ function New-ReminderWorkflow {
         else = [ordered]@{ actions = [ordered]@{} }
     }
     $actions['Get_due_documents'] = New-OpenApiAction -OperationId 'GetItems' -RunAfter @{ Require_current_refresh = @('Succeeded') } -Parameters @{
-        dataset = "@parameters('brmsRegisterSiteUrl')"
-        table = "@parameters('brmsRegisterListId')"
+        dataset = "$($RegisterSiteUrl)"
+        table = "$($RegisterListId)"
         '$filter' = "Active eq 1 and (Status eq 'Due Soon' or Status eq 'Overdue')"
         '$top' = 5000
     } -Paginate
@@ -495,8 +483,8 @@ function New-SourceMonitorWorkflow {
     $flowName = 'BRMS - GCT - Source Document Monitor'
     $forEachActions = [ordered]@{
         Reread_current_document = New-OpenApiAction -OperationId 'GetItem' -RunAfter @{} -Parameters @{
-            dataset = "@parameters('brmsRegisterSiteUrl')"
-            table = "@parameters('brmsRegisterListId')"
+            dataset = "$($RegisterSiteUrl)"
+            table = "$($RegisterListId)"
             id = "@items('For_each_registered_document')?['ID']"
         }
         Check_still_active = [ordered]@{
@@ -525,14 +513,14 @@ function New-SourceMonitorWorkflow {
                         actions = [ordered]@{
                             Compose_resolved_site = New-Compose -Inputs "@outputs('Compose_resolved_mapping')?['siteUrl']"
                             Compose_resolved_folder = New-Compose -RunAfter @{ Compose_resolved_site = @('Succeeded') } -Inputs "@coalesce(outputs('Compose_resolved_mapping')?['folderServerRelativeUrl'],'')"
-                            Compose_document_path = New-Compose -RunAfter @{ Compose_resolved_folder = @('Succeeded') } -Inputs "@replace(decodeUriComponent(uriPath(outputs('Compose_document_url'))),coalesce(outputs('Compose_resolved_mapping')?['siteServerRelativePath'],parameters('brmsDefaultSourceServerRelativeSitePath')),'')"
+                            Compose_document_path = New-Compose -RunAfter @{ Compose_resolved_folder = @('Succeeded') } -Inputs "@replace(decodeUriComponent(uriPath(outputs('Compose_document_url'))),coalesce(outputs('Compose_resolved_mapping')?['siteServerRelativePath'],$($DefaultSourceServerRelativeSitePath.TrimEnd('/'))),'')"
                             Get_source_metadata = New-OpenApiAction -OperationId 'GetFileMetadataByPath' -RunAfter @{ Compose_document_path = @('Succeeded') } -Parameters @{
                                 dataset = "@outputs('Compose_resolved_site')"
                                 path = "@outputs('Compose_document_path')"
                             }
                             Update_source_modified_date = New-OpenApiAction -OperationId 'PatchItem' -RunAfter @{ Get_source_metadata = @('Succeeded') } -Parameters @{
-                                dataset = "@parameters('brmsRegisterSiteUrl')"
-                                table = "@parameters('brmsRegisterListId')"
+                                dataset = "$($RegisterSiteUrl)"
+                                table = "$($RegisterListId)"
                                 id = "@items('For_each_registered_document')?['ID']"
                                 'item/SourceModifiedDate' = "@outputs('Get_source_metadata')?['body/LastModified']"
                             }
@@ -563,8 +551,8 @@ function New-SourceMonitorWorkflow {
     Add-ConfigurationBootstrap -Actions $actions -LastRunAfter 'Init_skipped_references' -IncludeSourceLibraryMap
     $actions['Get_configuration'].runAfter = @{ Init_skipped_references = @('Succeeded') }
     $actions['Get_registered_documents'] = New-OpenApiAction -OperationId 'GetItems' -RunAfter @{ Parse_source_library_map = @('Succeeded') } -Parameters @{
-        dataset = "@parameters('brmsRegisterSiteUrl')"
-        table = "@parameters('brmsRegisterListId')"
+        dataset = "$($RegisterSiteUrl)"
+        table = "$($RegisterListId)"
         '$filter' = 'Active eq 1'
         '$top' = 5000
     } -Paginate

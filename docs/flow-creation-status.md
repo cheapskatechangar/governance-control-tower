@@ -27,18 +27,22 @@ BRMS implementation defects are corrected in the generator and tests. The live c
 
 The bound settings file and the generated ZIP are produced outside the repository so credentials and connection IDs are not committed.
 
-## Live cloud-flow creation blocker (unchanged)
+## Live cloud-flow creation blocker (updated)
 
-The implementation corrections above do not lift the live creation blocker recorded previously.
+The implementation corrections above did not lift the live creation blocker. Verified additionally in this pass:
 
 | Field | Value |
 |---|---|
-| Environment | `RIS-TechCentral-Low-DEV` / `722e9526-2b55-e3b0-8bfb-e4475649af19` |
-| Import path attempted | `pac solution import --async` with the completed package |
-| Result | Failed at Power Platform solution checker enforcement before creating any flow |
-| Async operation ID | `93058e94-8cb0-f111-aaac-70a8a5af0770` |
-| Error | `An error occurred while trying to run solution checker enforcement on the importing solution. Try importing the solution again. If this problem persists, contact your system administrator.` |
-| Post-check | `pac power-automate list-cloud-flows` still returns zero `BRMS - GCT - ...` flows |
+| Async operation ID | `7987af49-44b2-f111-aaac-7ced8d3bdfca` |
+| Activity ID | `f53969c2-8637-41af-8de8-586b0a1576d2` |
+| ErrorCode | `-2147188660` |
+| Source | `Plugin/Microsoft.Crm.WebServices.ImportXmlService` → `RunSafe.RunSafeHandler.RunSafeChecker` |
+| Message | `An error occurred while trying to run solution checker enforcement on the importing solution.` |
+| Reproduction | A minimal 1-action solution (single `Compose`, no connections, no expressions) fails with the identical error. |
+| `pac solution check` | Hangs at `Analyzing; PercentComplete: 30` — Power Apps Checker service does not complete for this tenant. |
+| Post-check | `pac power-automate list-cloud-flows` returns zero `BRMS - GCT - ...` flows. |
+
+The blocker is confirmed environment-level Managed Environments policy (`RunSafeChecker` failing server-side), not our package content.
 
 Preserved SharePoint resources continue unchanged:
 

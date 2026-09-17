@@ -55,7 +55,7 @@ try {
 
     # Solution version corrections
     $solutionXml = [xml](Get-Content -LiteralPath (Join-Path $out 'solution.xml') -Raw)
-    Assert ($solutionXml.ImportExportXml.SolutionManifest.Version -eq '1.0.0.3') "Solution version must be bumped to 1.0.0.3; found $($solutionXml.ImportExportXml.SolutionManifest.Version)."
+    Assert ($solutionXml.ImportExportXml.SolutionManifest.Version -eq '1.0.0.4') "Solution version must be bumped to 1.0.0.4; found $($solutionXml.ImportExportXml.SolutionManifest.Version)."
 
     $files = Get-ChildItem -LiteralPath (Join-Path $out 'Workflows') -Filter '*.json'
     Assert ($files.Count -eq 3) "Expected 3 workflow JSON files, found $($files.Count)."
@@ -65,7 +65,9 @@ try {
         $json = Get-Content -LiteralPath $file.FullName -Raw | ConvertFrom-Json
         $workflows[$file.BaseName] = $json.properties.definition
         Assert (($json.properties.connectionReferences.shared_sharepointonline.api.name) -eq 'shared_sharepointonline') "SharePoint connection reference missing from $($file.BaseName)."
-        Assert ($json.properties.definition.parameters.brmsRegisterListId.defaultValue -eq '249e7c48-b75e-4b14-9ff0-eb00a854111a') "Register mapping missing from $($file.BaseName)."
+        Assert (($json.properties.connectionReferences.shared_sharepointonline.runtimeSource) -eq 'invoker') "SharePoint connection reference must use runtimeSource=invoker in $($file.BaseName)."
+        $paramNames = $json.properties.definition.parameters.PSObject.Properties.Name
+        Assert (($paramNames -join ',') -eq '$authentication,$connections') "Workflow must only define standard parameters; found: $($paramNames -join ',')"
     }
 
     $refreshKey = $workflows.Keys | Where-Object { $_ -like 'BRMSGCTReviewScheduleRefresh-*' } | Select-Object -First 1

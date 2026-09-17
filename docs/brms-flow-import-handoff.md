@@ -11,7 +11,75 @@ Administrative metadata only. BRMS artifacts must remain unsuffixed.
 | Environment URL | `https://org734d2f31.crm.dynamics.com` |
 | Solution unique name | `BRMSGovernanceControlTower` |
 | Solution display name | `BRMS Governance Control Tower` |
-| Solution version | `1.0.0.3` |
+| Solution version | `1.0.0.4` |
+| Package validation | `tests/Test-BrmsFlowArtifacts.ps1` passes |
+
+## Confirmed root cause of the import block
+
+The blocker is tenant/environment Managed Environments policy (`RunSafeChecker`), not our package content. Verified:
+
+- Import of a minimal single-`Compose`-action package (no connections, no expressions) to environment `722e9526-2b55-e3b0-8bfb-e4475649af19` failed with the identical server-side error.
+- Async operation `7987af49-44b2-f111-aaac-7ced8d3bdfca` completed with `statuscode=Failed` and message `An error occurred while trying to run solution checker enforcement on the importing solution.` (Activity ID `f53969c2-8637-41af-8de8-586b0a1576d2`, ErrorCode `-2147188660`).
+- Source: `Plugin/Microsoft.Crm.WebServices.ImportXmlService` → `Microsoft.Crm.Tools.ImportExportPublish.RunSafe.RunSafeHandler.RunSafeChecker`.
+- `pac solution check` also hangs at 30% analyzing indefinitely — the Power Apps Checker service is failing for this tenant.
+
+Per direction, we did not re-import the same rejected content and did not bypass checker enforcement.
+
+## Package refinements applied in this commit (independent of the enforcement blocker)
+
+Improved the generated flow definitions to match Microsoft's exported reference pattern (PROVEBackendFlows solution):
+
+- `connectionReferences.shared_sharepointonline.runtimeSource` = `invoker` (was `embedded`).
+- Removed workflow-definition-level custom parameters (`brmsRegisterSiteUrl`, `brmsRegisterListId`, etc.); the generator inlines the resolved literal values at generation time. Independent configurability is retained by regenerating the package with different generator parameters.
+- Default solution version bumped to `1.0.0.4`.
+
+These are structural refinements that align our workflow JSON with the tenant's own successful solution exports. They do not address the environment-level enforcement failure.
+
+## Preserved BRMS resources
+
+| Resource | List ID |
+|---|---|
+| Governance Control Tower | `249e7c48-b75e-4b14-9ff0-eb00a854111a` |
+| BRMS Configuration | `8a5524c7-01bd-4608-899f-62281313a8c6` |
+| BRMS Notification History | `ef96f9df-2e83-4040-9201-da4e8087918f` |
+| BRMS Automation Run History | `f0f62faf-86bb-4257-9c0d-f4f8571e71e2` |
+
+## Required Power Platform admin action
+
+The only remaining path to create the three flows in environment `722e9526-2b55-e3b0-8bfb-e4475649af19` is a Power Platform admin action:
+
+1. Adjust or resolve the Managed Environments solution-checker enforcement setting for env `722e9526-2b55-e3b0-8bfb-e4475649af19` so `RunSafeChecker` does not fail every solution import. Supporting evidence: async op `7987af49-44b2-f111-aaac-7ced8d3bdfca`, activity `f53969c2-8637-41af-8de8-586b0a1576d2`.
+2. Alternatively, provision a target environment for BRMS whose Managed Environments policy does not block solution import.
+3. Alternatively, authorize maker-designer manual creation for the three flows and provide business decisions for reminder cadence and authorized test recipient.
+
+## Prepared package regeneration
+
+```powershell
+.\scripts\New-BrmsFlowSolution.ps1 `
+  -RegisterSiteUrl 'https://reedelsevier.sharepoint.com/sites/ELSBUProjects/BRMS' `
+  -RegisterListId '249e7c48-b75e-4b14-9ff0-eb00a854111a' `
+  -ConfigurationSiteUrl 'https://reedelsevier.sharepoint.com/sites/ELSBUProjects/BRMS' `
+  -ConfigurationListId '8a5524c7-01bd-4608-899f-62281313a8c6' `
+  -NotificationHistorySiteUrl 'https://reedelsevier.sharepoint.com/sites/ELSBUProjects/BRMS' `
+  -NotificationHistoryListId 'ef96f9df-2e83-4040-9201-da4e8087918f' `
+  -AutomationRunHistorySiteUrl 'https://reedelsevier.sharepoint.com/sites/ELSBUProjects/BRMS' `
+  -AutomationRunHistoryListId 'f0f62faf-86bb-4257-9c0d-f4f8571e71e2' `
+  -DefaultSourceSiteUrl 'https://reedelsevier.sharepoint.com/sites/ELSBUProjects/BRMS' `
+  -DefaultSourceServerRelativeSitePath '/sites/ELSBUProjects/BRMS' `
+  -OutputDirectory '<restricted-output-folder>'
+```
+
+Bind the connection reference `cr1e9_BRMSSharePoint` (connector `/providers/Microsoft.PowerApps/apis/shared_sharepointonline`) to an existing SharePoint connection with access to the BRMS site and any configured source sites.
+
+## Post-import verification
+
+After the admin action succeeds and the package imports:
+
+1. Populate `BRMS Configuration` with `review-rules-v1`, `notification-settings-v1`, `source-library-map-v1`.
+2. Confirm flow names: `BRMS - GCT - Review Schedule Refresh`, `BRMS - GCT - Review Reminders`, `BRMS - GCT - Source Document Monitor`.
+3. Keep the recurrence triggers disabled during verification; run on-demand.
+4. Verify against synthetic register records; confirm run-history rows show actual `SuccessCount`, `FailureCount`, failed references, and `SanitizedErrors`.
+5. Confirm reminders remain preview-only (no outbound send action).
 
 ## Preserved BRMS resources
 
@@ -52,24 +120,3 @@ Run the generator outside the repository so the ZIP and connection-bound setting
 ```
 
 The generator prints the ZIP path, SHA-256, and solution version. Report the resulting hash in the deployment record; the ZIP itself is not committed.
-
-## Required connection-reference binding
-
-`pac solution create-settings --solution-zip BRMSGovernanceControlTower.zip --settings-file settings.json`, then bind:
-
-| Logical name | Connector ID | Required binding |
-|---|---|---|
-| `cr1e9_BRMSSharePoint` | `/providers/Microsoft.PowerApps/apis/shared_sharepointonline` | Existing connected SharePoint connection with access to the BRMS site and all configured source sites |
-
-## Import status
-
-Import remains blocked at Power Platform solution-checker enforcement. See `docs/flow-creation-status.md` for the recorded async operation ID, error text, and post-check results. The implementation corrections in this commit do not change the import result.
-
-## Maker/admin action required
-
-1. Resolve the environment's solution-checker enforcement failure or import the package through the Power Automate maker portal with the `cr1e9_BRMSSharePoint` connection reference bound to the SharePoint connector connection.
-2. Populate `review-rules-v1`, `notification-settings-v1`, and `source-library-map-v1` rows in BRMS Configuration.
-3. Confirm the three flows exist with these exact names: `BRMS - GCT - Review Schedule Refresh`, `BRMS - GCT - Review Reminders`, `BRMS - GCT - Source Document Monitor`.
-4. Keep reminders in preview; do not add outbound send actions until rollout is approved.
-5. Test Review Schedule Refresh against the synthetic records in `Governance Control Tower`, verify writes to `NextReviewDue`, `DaysToReview`, and `Status`, then run reminders and source monitoring in that order.
-6. Record flow IDs, management URLs, run IDs, run results, list changes, notification preview rows, source observations, and Automation Run History rows in the Loop workspace.
