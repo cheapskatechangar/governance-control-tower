@@ -2,7 +2,9 @@
 
 Current update (2026-10-16): Solution 1.0.0.11 is installed. Owner-manager escalation intent is implemented and validated at 14 days overdue, repeating weekly with owner Cc. One controlled escalation email was accepted by Outlook for the test recipient; the repeat run produced zero new sends and zero failures. Eleven offline tests pass. All schedules are Off and preview controls are restored. Production outbound remains disabled and processing remains synthetic-only. See [manager escalation evidence](brms-manager-escalation.md). The [governance form layout](brms-form-layout.md) is updated live and visually verified.
 
-Remaining: inbox appearance/link confirmation, fallback contact decision, wider production routing and negative/concurrency/source acceptance. Flow creation/import is no longer the blocker.
+Handover update: email appearance confirmed; both requested business contacts are verified co-owners of all three flows. The home page was redesigned. Both fallback contacts are approved and recorded, but multi-recipient fallback implementation is pending. See [handover checkpoint](brms-handover.md) and [home page](brms-homepage.md).
+
+Remaining: link/access smoke tests by the new owners, multiple-recipient fallback deployment, durable connection ownership, wider production routing and negative/concurrency/source acceptance. Flow creation/import is no longer the blocker.
 
 The following implementation and enforcement notes are historical. The old environment's checker failure must not be used as the current target's diagnosis without fresh evidence. The native browser package uses a different generator and the existing resource-map configuration contract.
 

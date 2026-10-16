@@ -6,7 +6,7 @@ Approved in the project conversation on 2026-10-16: first escalation at 14 calen
 
 Version 1.0.0.11 resolves the SharePoint OwnerId to its login UPN and email, then calls Office 365 Users Get manager (V2), selecting only id, displayName, mail and userPrincipalName. The new `cr1e9_BRMSDirectory` connection reference was bound to the existing approved account during maker import.
 
-An explicit configured fallback can be used only for a missing manager (404) or missing manager mail. No fallback recipient has been supplied. Missing or invalid destinations therefore stop that item and are logged. Authentication and service errors do not silently use a fallback. Routing state is reset for each record and included in failed/skipped audit references.
+An explicit configured fallback can be used only for a missing manager (404) or missing manager mail. Both fallback contacts were approved later on 2026-10-16. Their addresses are recorded in restricted decision metadata. Multiple-recipient deployment is pending; the active single-recipient field remains empty. Missing or invalid destinations therefore stop that item and are logged. Authentication and service errors do not silently use a fallback. Routing state is reset for each record and included in failed/skipped audit references.
 
 Actual email delivery remains restricted to the single configured test recipient and an allowlist of at most two synthetic items. The intended To/Cc route is included in the test email and restricted notification history, but no manager is contacted. Production sends remain disabled. This is implemented and tested routing intent, not a live production escalation service.
 
@@ -28,4 +28,4 @@ Repeat run `08584094353270186451013007350CU25` succeeded in 34 seconds: 9 proces
 
 ## Remaining acceptance
 
-Confirm the received email appearance and links. Supply a fallback BRMS contact or approve permanent fail-closed handling for missing managers. Validate missing-manager, authorization/service failure, concurrency and wider production cases before enabling production delivery. No production schedule or real-manager sending is enabled by this change.
+Email appearance is confirmed. Implement and validate the two approved fallback contacts, confirm record links and new-owner access. See [handover checkpoint](brms-handover.md). Validate missing-manager, authorization/service failure, concurrency and wider production cases before enabling production delivery. No production schedule or real-manager sending is enabled by this change.

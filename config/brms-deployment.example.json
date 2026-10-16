@@ -105,7 +105,9 @@
         "repeatDays": 7,
         "copyOwner": true,
         "fallbackRecipient": "",
-        "approval": "approved"
+        "approval": "approved",
+        "approvedFallbackRecipients": [],
+        "fallbackImplementationStatus": "approved-pending-multi-recipient-deployment"
       }
     },
     "reviewRules": {
