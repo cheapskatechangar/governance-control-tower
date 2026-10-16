@@ -21,3 +21,7 @@ Authenticated SharePoint image URLs must not be assumed to work in Outlook. Micr
 
 - `BR Logo.png`: SHA-256 `3ba3ba5eedf2e4d00dd24ea99d96ed758cb0fa2602a36e6ca0410ed81b134b1b`
 - `Elsevier_Stacked Logo_VitalOrange_RGB.png`: SHA-256 `c81559e00570008acdbaaf61989832deb44a72944d222c1fe0863c5b07eba811`
+
+## Follow-up: form applied for user visual review
+
+The project owner authorized the next step after the device-policy limitation was explained. The dual-logo form header is now saved and its two Site Assets image references persisted after reloading NewForm.aspx. The white logo strip sits above the existing navy title, with BR primary and Elsevier secondary. The body, footer and fields were preserved; no record was created. Image rendering remains unverified in the remote browser (zero natural image width). User visual review on the work device is required. `config/brms-document-form-header.json` now reflects this applied configuration; the historical pending candidate is retained. Homepage and email branding remain pending. No production notification or flow changes were made.
