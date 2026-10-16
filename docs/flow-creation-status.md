@@ -1,6 +1,8 @@
 # BRMS Power Automate implementation and creation status
 
-BRMS implementation defects are corrected in the generator and tests. The live cloud-flow creation blocker is separate and unchanged.
+Current update (2026-10-15): the owner supplied a new target, `ELS-Operations-Prod` (`2c2b2f3f-eec6-ea9e-a492-7114c0975e11`). Browser sign-in and the existing SharePoint connection were verified. Native package `1.0.0.5` failed workflow parsing on missing schemaVersion; corrected package `1.0.0.6` is being imported; successful creation and live acceptance are not yet claimed. See [current browser deployment evidence](brms-browser-deployment.md).
+
+The following implementation and enforcement notes are historical. The old environment's checker failure must not be used as the current target's diagnosis without fresh evidence. The native browser package uses a different generator and the existing resource-map configuration contract.
 
 ## Implementation corrections (in this commit)
 

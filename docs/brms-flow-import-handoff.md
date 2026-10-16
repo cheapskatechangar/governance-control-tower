@@ -6,14 +6,25 @@ Administrative metadata only. BRMS artifacts must remain unsuffixed.
 
 | Field | Value |
 |---|---|
-| Environment name | Pending live verification |
+| Environment name | `ELS-Operations-Prod` (verified in maker portal) |
 | Environment ID | `2c2b2f3f-eec6-ea9e-a492-7114c0975e11` |
 | Power Automate | https://make.powerautomate.com/environments/2c2b2f3f-eec6-ea9e-a492-7114c0975e11/flows |
 | Dataverse environment URL | Pending live verification; do not reuse the previous environment URL |
 | Solution unique name | `BRMSGovernanceControlTower` |
 | Solution display name | `BRMS Governance Control Tower` |
-| Solution version | `1.0.0.4` |
-| Package validation | `tests/Test-BrmsFlowArtifacts.ps1` passes |
+| Current browser-import version | `1.0.0.6` |
+| Package validation | Four offline structural tests pass; live acceptance pending |
+
+## Browser deployment, 2026-10-15
+
+The owner requested browser interaction instead of PowerShell. The maker portal authenticated successfully in the new target, accepted version `1.0.0.6`, and displayed a valid existing SharePoint connection for `cr1e9_BRMSSharePoint`. Import was submitted through the supported UI. The current result and remaining acceptance work are tracked in [browser deployment evidence](brms-browser-deployment.md).
+
+The current native generator is `scripts/build_brms_browser_package.py`. It emits native workflow actions, reads the existing `resource-map-v2`, `review-rules-v1`, and `notification-settings-v1` contract, and resolves source mappings from `resource-map-v2.sourceLibraries`. It does **not** require a separate `source-library-map-v1` row. All three flows are packaged disabled and gated to synthetic preview validation. The historical PowerShell generator and its tests below describe an older package, not acceptance evidence for version `1.0.0.6`.
+
+```bash
+python scripts/build_brms_browser_package.py --output /path/outside/repository
+python -m unittest discover -s tests -p test_brms_browser_package.py -v
+```
 
 ## Deployment target update
 
@@ -35,7 +46,7 @@ The prior investigation recorded a `RunSafeChecker` enforcement failure in envir
 
 Per direction, we did not re-import the same rejected content and did not bypass checker enforcement.
 
-## Package refinements applied in this commit (independent of the enforcement blocker)
+## Historical version 1.0.0.4 package refinements
 
 Improved the generated flow definitions to match Microsoft's exported reference pattern (PROVEBackendFlows solution):
 
@@ -60,7 +71,7 @@ Proceed with supported import or maker creation in the new target `2c2b2f3f-eec6
 
 If this target rejects an import, capture its own operation ID and exact error, resolve actionable package findings, and escalate environment policy or service failures to the administrator. Do not disable enforcement or repeatedly import an unchanged rejected package.
 
-## Prepared package regeneration
+## Historical PowerShell package regeneration
 
 ```powershell
 .\scripts\New-BrmsFlowSolution.ps1 `
@@ -83,9 +94,9 @@ Bind the connection reference `cr1e9_BRMSSharePoint` (connector `/providers/Micr
 
 After the package imports into the current target:
 
-1. Populate `BRMS Configuration` with `review-rules-v1`, `notification-settings-v1`, `source-library-map-v1`.
+1. Verify the enabled `BRMS Configuration` rows `resource-map-v2`, `review-rules-v1`, and `notification-settings-v1`. Source libraries are within the resource map.
 2. Confirm flow names: `BRMS - GCT - Review Schedule Refresh`, `BRMS - GCT - Review Reminders`, `BRMS - GCT - Source Document Monitor`.
-3. Keep the recurrence triggers disabled during verification; run on-demand.
+3. Confirm all flows imported disabled. Use controlled maker-portal testing; if the platform requires activation, restrict processing to the synthetic scope and turn the flow back off after testing.
 4. Verify against synthetic register records; confirm run-history rows show actual `SuccessCount`, `FailureCount`, failed references, and `SanitizedErrors`.
 5. Confirm reminders remain preview-only (no outbound send action).
 
