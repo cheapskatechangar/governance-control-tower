@@ -48,6 +48,7 @@ class BrowserPackageTests(unittest.TestCase):
         for flow in flows:
             self.assertEqual(flow.findtext('StateCode'), '0')
             self.assertEqual(flow.findtext('StatusCode'), '1')
+            self.assertEqual(flow.findtext('ModernFlowType'), '0')
         manifest = ET.parse(ROOT / 'scripts/native-brms/solution.xml').getroot()
         self.assertEqual(manifest.findtext('./SolutionManifest/Version'), brms.VERSION)
 
@@ -84,11 +85,28 @@ class BrowserPackageTests(unittest.TestCase):
                 self.assertNotIn('retryPolicy', action.get('runtimeConfiguration', {}))
                 self.assertIn('retryPolicy', inputs)
                 self.assertEqual(inputs['authentication'], "@parameters('$authentication')")
+                if inputs['host']['operationId'] == 'PostItem':
+                    self.assertIn('item', inputs['parameters'])
+                    self.assertIsInstance(inputs['parameters']['item'], dict)
+                    self.assertFalse(any(k.startswith('item/') for k in inputs['parameters']))
                 if inputs['parameters'].get('parameters/method') == 'POST':
                     self.assertIn('IF-MATCH', inputs['parameters']['parameters/headers'])
                     self.assertEqual(inputs['retryPolicy']['type'], 'none')
             self.assertEqual(actions['Get_documents']['runtimeConfiguration']['paginationPolicy']['minimumItemCount'], 100000)
             self.assertEqual(actions['For_each_document']['runtimeConfiguration']['concurrency']['repetitions'], 1)
+
+    def test_business_dates_are_normalized_before_month_arithmetic_and_writes(self):
+        for name in ['Review Schedule Refresh', 'Review Reminders']:
+            actions = dict(walk(self.flows[name]['properties']['definition']['actions']))
+            self.assertIn("'UTC','Eastern Standard Time','yyyy-MM-dd'", actions['Compose_reviewed_day']['inputs'])
+            self.assertIn("outputs('Compose_reviewed_day')", actions['Compose_due']['inputs'])
+            self.assertNotIn('LastReviewedDate', actions['Compose_due']['inputs'])
+            self.assertIn('v8|', actions['Set_context']['inputs']['value'])
+        refresh = dict(walk(self.flows['Review Schedule Refresh']['properties']['definition']['actions']))
+        self.assertIn('convertToUtc', refresh['Compose_patch']['inputs']['NextReviewDue'])
+        reminder = dict(walk(self.flows['Review Reminders']['properties']['definition']['actions']))
+        self.assertIn("'UTC','Eastern Standard Time','yyyy-MM-dd'", reminder['Require_current_schedule']['inputs']['content'])
+        self.assertIn('preview-v8', reminder['Compose_key']['inputs'])
 
     def test_owned_fields_and_actual_run_accounting(self):
         expected = {'Review Schedule Refresh': {'NextReviewDue','DaysToReview','Status'}, 'Source Document Monitor': {'SourceModifiedDate'}}
@@ -97,11 +115,11 @@ class BrowserPackageTests(unittest.TestCase):
             self.assertEqual(set(actions['Compose_patch']['inputs']), fields)
         for flow in self.flows.values():
             actions = dict(walk(flow['properties']['definition']['actions']))
-            record = actions['Record_run']['inputs']['parameters']
-            self.assertEqual(record['item/RunKey'], "@workflow()?['run']?['name']")
-            self.assertEqual(record['item/ProcessedCount'], "@length(variables('Outcomes'))")
-            self.assertEqual(record['item/SuccessCount'], "@length(body('Successful_items'))")
-            self.assertEqual(record['item/FailureCount'], "@length(body('Failed_items'))")
+            record = actions['Record_run']['inputs']['parameters']['item']
+            self.assertEqual(record['RunKey'], "@workflow()?['run']?['name']")
+            self.assertEqual(record['ProcessedCount'], "@length(variables('Outcomes'))")
+            self.assertEqual(record['SuccessCount'], "@length(body('Successful_items'))")
+            self.assertEqual(record['FailureCount'], "@length(body('Failed_items'))")
             self.assertEqual(actions['Finalize']['runAfter']['Work'], brms.ALL)
 
 

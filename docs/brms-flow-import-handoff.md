@@ -12,21 +12,21 @@ Administrative metadata only. BRMS artifacts must remain unsuffixed.
 | Dataverse environment URL | Pending live verification; do not reuse the previous environment URL |
 | Solution unique name | `BRMSGovernanceControlTower` |
 | Solution display name | `BRMS Governance Control Tower` |
-| Current browser-import version | `1.0.0.6` |
-| Package validation | Four offline structural tests pass; live acceptance pending |
+| Current browser-import version | `1.0.0.8` |
+| Package validation | Five offline structural tests pass; basic live synthetic checks pass; production acceptance pending |
 
 ## Browser deployment, 2026-10-15
 
-The owner requested browser interaction instead of PowerShell. The maker portal authenticated successfully in the new target, accepted version `1.0.0.6`, and displayed a valid existing SharePoint connection for `cr1e9_BRMSSharePoint`. Import was submitted through the supported UI. The current result and remaining acceptance work are tracked in [browser deployment evidence](brms-browser-deployment.md).
+The owner requested browser interaction instead of PowerShell. The maker portal authenticated successfully in the new target, accepted version `1.0.0.6`, and displayed a valid existing SharePoint connection for `cr1e9_BRMSSharePoint`. Versions 1.0.0.6, 1.0.0.7 and 1.0.0.8 imported successfully through the supported UI. All three flows now exist and have successful synthetic execution evidence. Repeat reminder deduplication passed. Schedules are Off after testing; production acceptance and live reminder implementation remain. The current result and remaining acceptance work are tracked in [browser deployment evidence](brms-browser-deployment.md).
 
-The current native generator is `scripts/build_brms_browser_package.py`. It emits native workflow actions, reads the existing `resource-map-v2`, `review-rules-v1`, and `notification-settings-v1` contract, and resolves source mappings from `resource-map-v2.sourceLibraries`. It does **not** require a separate `source-library-map-v1` row. All three flows are packaged disabled and gated to synthetic preview validation. The historical PowerShell generator and its tests below describe an older package, not acceptance evidence for version `1.0.0.6`.
+The current native generator is `scripts/build_brms_browser_package.py`. It emits native workflow actions, reads the existing `resource-map-v2`, `review-rules-v1`, and `notification-settings-v1` contract, and resolves source mappings from `resource-map-v2.sourceLibraries`. It does **not** require a separate `source-library-map-v1` row. All three flows are packaged disabled and gated to synthetic preview validation. The historical PowerShell generator and its tests below describe an older package, not acceptance evidence for the current native package.
 
 ```bash
 python scripts/build_brms_browser_package.py --output /path/outside/repository
 python -m unittest discover -s tests -p test_brms_browser_package.py -v
 ```
 
-## Deployment target update
+## Historical deployment target update
 
 On 2026-10-15 (America/New_York), the project owner reported access to the environment above and identified it as the BRMS target. This supersedes the previous target `722e9526-2b55-e3b0-8bfb-e4475649af19`.
 
@@ -67,7 +67,7 @@ These are structural refinements that align our workflow JSON with the tenant's 
 
 ## Current deployment path
 
-Proceed with supported import or maker creation in the new target `2c2b2f3f-eec6-ea9e-a492-7114c0975e11`. The old environment's enforcement failure is retained as historical evidence, not an active diagnosis for this environment.
+Flow creation and import are complete in target `2c2b2f3f-eec6-ea9e-a492-7114c0975e11`. Continue the remaining boundary/failure-path acceptance listed in the current evidence document, then implement and agree the live reminder cadence before removing preview/synthetic gates. The old environment's enforcement failure is retained as historical evidence, not an active diagnosis for this environment.
 
 If this target rejects an import, capture its own operation ID and exact error, resolve actionable package findings, and escalate environment policy or service failures to the administrator. Do not disable enforcement or repeatedly import an unchanged rejected package.
 

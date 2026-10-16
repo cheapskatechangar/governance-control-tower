@@ -1,6 +1,6 @@
 # BRMS Power Automate implementation and creation status
 
-Current update (2026-10-15): the owner supplied a new target, `ELS-Operations-Prod` (`2c2b2f3f-eec6-ea9e-a492-7114c0975e11`). Browser sign-in and the existing SharePoint connection were verified. Native package `1.0.0.5` failed workflow parsing on missing schemaVersion; corrected package `1.0.0.6` is being imported; successful creation and live acceptance are not yet claimed. See [current browser deployment evidence](brms-browser-deployment.md).
+Current update (2026-10-15 Eastern / 2026-10-16 UTC): all three unsuffixed BRMS flows exist in `ELS-Operations-Prod` (`2c2b2f3f-eec6-ea9e-a492-7114c0975e11`). Solution `1.0.0.8` is installed. Refresh, source monitoring and reminder preview ran successfully; a repeat reminder produced zero new previews. Five offline structural tests pass. Business-date handling was corrected and verified live. All schedules are Off, processing remains synthetic-only and notifications remain preview-only. Remaining work is production acceptance and live reminder implementation/cadence, not flow creation or import. See [current browser deployment evidence](brms-browser-deployment.md).
 
 The following implementation and enforcement notes are historical. The old environment's checker failure must not be used as the current target's diagnosis without fresh evidence. The native browser package uses a different generator and the existing resource-map configuration contract.
 
@@ -29,7 +29,7 @@ The following implementation and enforcement notes are historical. The old envir
 
 The bound settings file and the generated ZIP are produced outside the repository so credentials and connection IDs are not committed.
 
-## Live cloud-flow creation blocker (updated)
+## Historical cloud-flow creation blocker in the previous environment
 
 The implementation corrections above did not lift the live creation blocker. Verified additionally in this pass:
 
@@ -61,7 +61,7 @@ Preserved SharePoint resources continue unchanged:
 
 Outbound reminders remain preview-only until rollout is explicitly authorized.
 
-## What remains for BRMS completion
+## Historical pre-import handoff checklist (superseded by current evidence)
 
 BRMS is not complete until the corrected package is imported and the three flows perform their required behavior with verified execution evidence:
 

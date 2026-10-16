@@ -14,7 +14,7 @@ SITE = 'https://reedelsevier.sharepoint.com/sites/ELSBUProjects/BRMS'
 ENV = '2c2b2f3f-eec6-ea9e-a492-7114c0975e11'
 CONFIG = '8a5524c7-01bd-4608-899f-62281313a8c6'
 RUNS = 'f0f62faf-86bb-4257-9c0d-f4f8571e71e2'
-VERSION = '1.0.0.6'
+VERSION = '1.0.0.8'
 ALL = ['Succeeded', 'Failed', 'TimedOut', 'Skipped']
 
 
@@ -51,6 +51,11 @@ def query(source, expression, after=None):
 
 
 def api(operation, params, after=None, pages=False, retry=True):
+    if operation == 'PostItem':
+        # Runtime-resolved lists have no design-time expanded item schema.
+        # Supply the required dynamic item object instead of flattened paths.
+        params = {**{k: v for k, v in params.items() if not k.startswith('item/')},
+                  'item': {k[5:]: v for k, v in params.items() if k.startswith('item/')}}
     a = action('OpenApiConnection', {
         'host': {'apiId': '/providers/Microsoft.PowerApps/apis/shared_sharepointonline',
                  'connectionName': 'shared_sharepointonline', 'operationId': operation},
@@ -104,7 +109,7 @@ def bootstrap():
     a['Require_test_scope'] = check("@and(equals(body('Parse_Map')?['powerAutomate']?['environmentId'],'" + ENV + "'),equals(body('Parse_Map')?['powerAutomate']?['validationScope'],'synthetic-records-only'),equals(body('Parse_Notifications')?['mode'],'preview'),equals(body('Parse_Notifications')?['outboundRemindersEnabled'],false))", 'Set_resources')
     a['Compose_local_day'] = compose("@formatDateTime(convertTimeZone(variables('Started'),'UTC','Eastern Standard Time'),'yyyy-MM-dd')", 'Require_test_scope')
     a['Compose_day_start'] = compose("@convertToUtc(concat(outputs('Compose_local_day'),'T00:00:00'),'Eastern Standard Time')", 'Compose_local_day')
-    a['Set_context'] = setvar('Context', "@concat('v5|" + ENV + "|',variables('Resources')?['governanceRegister']?['listId'],'|',first(body('Filter_Map'))?['Modified'],'|',first(body('Filter_Rules'))?['Modified'])", 'Compose_day_start')
+    a['Set_context'] = setvar('Context', "@concat('v8|" + ENV + "|',variables('Resources')?['governanceRegister']?['listId'],'|',first(body('Filter_Map'))?['Modified'],'|',first(body('Filter_Rules'))?['Modified'])", 'Compose_day_start')
     return a
 
 
@@ -112,7 +117,8 @@ def calculations():
     return {
         'Compose_months': compose("@int(coalesce(body('Parse_Rules')?['calendarMonthsByFrequency']?[body('Read_current')?['d']?['ReviewFrequency']],0))"),
         'Require_frequency': check("@or(empty(body('Read_current')?['d']?['LastReviewedDate']),greater(outputs('Compose_months'),0))", 'Compose_months'),
-        'Compose_due': compose("@if(empty(body('Read_current')?['d']?['LastReviewedDate']),null,formatDateTime(addToTime(body('Read_current')?['d']?['LastReviewedDate'],outputs('Compose_months'),'Month'),'yyyy-MM-dd'))", 'Require_frequency'),
+        'Compose_reviewed_day': compose("@if(empty(body('Read_current')?['d']?['LastReviewedDate']),null,convertTimeZone(body('Read_current')?['d']?['LastReviewedDate'],'UTC','Eastern Standard Time','yyyy-MM-dd'))", 'Require_frequency'),
+        'Compose_due': compose("@if(empty(outputs('Compose_reviewed_day')),null,formatDateTime(addToTime(concat(outputs('Compose_reviewed_day'),'T00:00:00'),outputs('Compose_months'),'Month'),'yyyy-MM-dd'))", 'Compose_reviewed_day'),
         'Compose_days': compose("@if(empty(outputs('Compose_due')),null,div(sub(ticks(outputs('Compose_due')),ticks(outputs('Compose_local_day'))),864000000000))", 'Compose_due'),
         'Compose_status': compose("@if(empty(outputs('Compose_due')),'Not Set',if(less(int(outputs('Compose_days')),0),'Overdue',if(lessOrEquals(int(outputs('Compose_days')),int(body('Parse_Rules')?['dueSoonMaximumDays'])),'Due Soon','Current')))", 'Compose_days')
     }
@@ -120,7 +126,7 @@ def calculations():
 
 def refresh_item():
     a = calculations()
-    a['Compose_patch'] = compose({'NextReviewDue': "@outputs('Compose_due')", 'DaysToReview': "@outputs('Compose_days')", 'Status': "@outputs('Compose_status')"}, 'Compose_status')
+    a['Compose_patch'] = compose({'NextReviewDue': "@if(empty(outputs('Compose_due')),null,convertToUtc(concat(outputs('Compose_due'),'T00:00:00'),'Eastern Standard Time'))", 'DaysToReview': "@outputs('Compose_days')", 'Status': "@outputs('Compose_status')"}, 'Compose_status')
     a['Update_schedule'] = patch('Compose_patch')
     a['Mark_refresh_success'] = setvar('ItemState', 'Succeeded', 'Update_schedule')
     return a
@@ -128,11 +134,11 @@ def refresh_item():
 
 def reminder_item():
     a = calculations()
-    a['Require_current_schedule'] = check("@and(equals(outputs('Compose_due'),if(empty(body('Read_current')?['d']?['NextReviewDue']),null,formatDateTime(body('Read_current')?['d']?['NextReviewDue'],'yyyy-MM-dd'))),equals(outputs('Compose_days'),body('Read_current')?['d']?['DaysToReview']),equals(outputs('Compose_status'),body('Read_current')?['d']?['Status']))", 'Compose_status')
+    a['Require_current_schedule'] = check("@and(equals(outputs('Compose_due'),if(empty(body('Read_current')?['d']?['NextReviewDue']),null,convertTimeZone(body('Read_current')?['d']?['NextReviewDue'],'UTC','Eastern Standard Time','yyyy-MM-dd'))),equals(outputs('Compose_days'),body('Read_current')?['d']?['DaysToReview']),equals(outputs('Compose_status'),body('Read_current')?['d']?['Status']))", 'Compose_status')
     eligible = {
         'Compose_recipient': compose("@toLower(join(body('Parse_Notifications')?['testRecipients'],';'))"),
         'Require_test_recipient': check("@and(not(empty(outputs('Compose_recipient'))),contains(outputs('Compose_recipient'),'@'))", 'Compose_recipient'),
-        'Compose_key': compose("@concat('BRMS|',variables('Resources')?['governanceRegister']?['listId'],'|',string(items('For_each_document')?['ID']),'|',outputs('Compose_due'),'|',outputs('Compose_status'),'|preview-v5|',outputs('Compose_recipient'))", 'Require_test_recipient'),
+        'Compose_key': compose("@concat('BRMS|',variables('Resources')?['governanceRegister']?['listId'],'|',string(items('For_each_document')?['ID']),'|',outputs('Compose_due'),'|',outputs('Compose_status'),'|preview-v8|',outputs('Compose_recipient'))", 'Require_test_recipient'),
         'Require_key_length': check("@lessOrEquals(length(outputs('Compose_key')),255)", 'Compose_key'),
         'Find_preview': api('GetItems', {'dataset': res('notificationHistory','siteUrl'), 'table': res('notificationHistory','listId'), '$filter': "NotificationKey eq '@{replace(outputs('Compose_key'),'''','''''')}'", '$top': 2}, 'Require_key_length'),
         'Require_unique_preview': check("@lessOrEquals(length(body('Find_preview')?['value']),1)", 'Find_preview')

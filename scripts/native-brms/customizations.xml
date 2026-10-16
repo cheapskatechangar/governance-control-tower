@@ -9,7 +9,7 @@
       <StateCode>0</StateCode><StatusCode>1</StatusCode><RunAs>1</RunAs><IsTransacted>1</IsTransacted>
       <IntroducedVersion>1.0</IntroducedVersion><IsCustomizable>1</IsCustomizable>
       <IsCustomProcessingStepAllowedForOtherPublishers>1</IsCustomProcessingStepAllowedForOtherPublishers>
-      <ModernFlowType>1</ModernFlowType><PrimaryEntity>none</PrimaryEntity>
+      <ModernFlowType>0</ModernFlowType><PrimaryEntity>none</PrimaryEntity>
       <LocalizedNames><LocalizedName languagecode="1033" description="BRMS - GCT - Review Schedule Refresh" /></LocalizedNames>
     </Workflow>
     <Workflow WorkflowId="{22222222-2222-4222-8222-222222222222}" Name="BRMS - GCT - Review Reminders">
@@ -20,7 +20,7 @@
       <StateCode>0</StateCode><StatusCode>1</StatusCode><RunAs>1</RunAs><IsTransacted>1</IsTransacted>
       <IntroducedVersion>1.0</IntroducedVersion><IsCustomizable>1</IsCustomizable>
       <IsCustomProcessingStepAllowedForOtherPublishers>1</IsCustomProcessingStepAllowedForOtherPublishers>
-      <ModernFlowType>1</ModernFlowType><PrimaryEntity>none</PrimaryEntity>
+      <ModernFlowType>0</ModernFlowType><PrimaryEntity>none</PrimaryEntity>
       <LocalizedNames><LocalizedName languagecode="1033" description="BRMS - GCT - Review Reminders" /></LocalizedNames>
     </Workflow>
     <Workflow WorkflowId="{33333333-3333-4333-8333-333333333333}" Name="BRMS - GCT - Source Document Monitor">
@@ -31,7 +31,7 @@
       <StateCode>0</StateCode><StatusCode>1</StatusCode><RunAs>1</RunAs><IsTransacted>1</IsTransacted>
       <IntroducedVersion>1.0</IntroducedVersion><IsCustomizable>1</IsCustomizable>
       <IsCustomProcessingStepAllowedForOtherPublishers>1</IsCustomProcessingStepAllowedForOtherPublishers>
-      <ModernFlowType>1</ModernFlowType><PrimaryEntity>none</PrimaryEntity>
+      <ModernFlowType>0</ModernFlowType><PrimaryEntity>none</PrimaryEntity>
       <LocalizedNames><LocalizedName languagecode="1033" description="BRMS - GCT - Source Document Monitor" /></LocalizedNames>
     </Workflow>
   </Workflows>
