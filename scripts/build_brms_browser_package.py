@@ -9,12 +9,15 @@ import json
 from pathlib import Path
 import shutil
 import zipfile
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from brms_email import TEMPLATE
 
 SITE = 'https://reedelsevier.sharepoint.com/sites/ELSBUProjects/BRMS'
 ENV = '2c2b2f3f-eec6-ea9e-a492-7114c0975e11'
 CONFIG = '8a5524c7-01bd-4608-899f-62281313a8c6'
 RUNS = 'f0f62faf-86bb-4257-9c0d-f4f8571e71e2'
-VERSION = '1.0.0.8'
+VERSION = '1.0.0.10'
 ALL = ['Succeeded', 'Failed', 'TimedOut', 'Skipped']
 
 
@@ -106,10 +109,10 @@ def bootstrap():
         a['Parse_' + label] = action('ParseJson', {'content': f"@json(first(body('Filter_{label}'))?['Value'])", 'schema': {'type': 'object'}}, 'Require_' + label)
         previous = 'Parse_' + label
     a['Set_resources'] = setvar('Resources', "@body('Parse_Map')?['resources']", previous)
-    a['Require_test_scope'] = check("@and(equals(body('Parse_Map')?['powerAutomate']?['environmentId'],'" + ENV + "'),equals(body('Parse_Map')?['powerAutomate']?['validationScope'],'synthetic-records-only'),equals(body('Parse_Notifications')?['mode'],'preview'),equals(body('Parse_Notifications')?['outboundRemindersEnabled'],false))", 'Set_resources')
+    a['Require_test_scope'] = check("@and(equals(body('Parse_Map')?['powerAutomate']?['environmentId'],'" + ENV + "'),equals(body('Parse_Map')?['powerAutomate']?['validationScope'],'synthetic-records-only'),contains(createArray('preview','test'),body('Parse_Notifications')?['mode']),equals(body('Parse_Notifications')?['outboundRemindersEnabled'],false))", 'Set_resources')
     a['Compose_local_day'] = compose("@formatDateTime(convertTimeZone(variables('Started'),'UTC','Eastern Standard Time'),'yyyy-MM-dd')", 'Require_test_scope')
     a['Compose_day_start'] = compose("@convertToUtc(concat(outputs('Compose_local_day'),'T00:00:00'),'Eastern Standard Time')", 'Compose_local_day')
-    a['Set_context'] = setvar('Context', "@concat('v8|" + ENV + "|',variables('Resources')?['governanceRegister']?['listId'],'|',first(body('Filter_Map'))?['Modified'],'|',first(body('Filter_Rules'))?['Modified'])", 'Compose_day_start')
+    a['Set_context'] = setvar('Context', "@concat('v9|" + ENV + "|',variables('Resources')?['governanceRegister']?['listId'],'|',first(body('Filter_Map'))?['Modified'],'|',first(body('Filter_Rules'))?['Modified'])", 'Compose_day_start')
     return a
 
 
@@ -133,37 +136,10 @@ def refresh_item():
 
 
 def reminder_item():
-    a = calculations()
-    a['Require_current_schedule'] = check("@and(equals(outputs('Compose_due'),if(empty(body('Read_current')?['d']?['NextReviewDue']),null,convertTimeZone(body('Read_current')?['d']?['NextReviewDue'],'UTC','Eastern Standard Time','yyyy-MM-dd'))),equals(outputs('Compose_days'),body('Read_current')?['d']?['DaysToReview']),equals(outputs('Compose_status'),body('Read_current')?['d']?['Status']))", 'Compose_status')
-    eligible = {
-        'Compose_recipient': compose("@toLower(join(body('Parse_Notifications')?['testRecipients'],';'))"),
-        'Require_test_recipient': check("@and(not(empty(outputs('Compose_recipient'))),contains(outputs('Compose_recipient'),'@'))", 'Compose_recipient'),
-        'Compose_key': compose("@concat('BRMS|',variables('Resources')?['governanceRegister']?['listId'],'|',string(items('For_each_document')?['ID']),'|',outputs('Compose_due'),'|',outputs('Compose_status'),'|preview-v8|',outputs('Compose_recipient'))", 'Require_test_recipient'),
-        'Require_key_length': check("@lessOrEquals(length(outputs('Compose_key')),255)", 'Compose_key'),
-        'Find_preview': api('GetItems', {'dataset': res('notificationHistory','siteUrl'), 'table': res('notificationHistory','listId'), '$filter': "NotificationKey eq '@{replace(outputs('Compose_key'),'''','''''')}'", '$top': 2}, 'Require_key_length'),
-        'Require_unique_preview': check("@lessOrEquals(length(body('Find_preview')?['value']),1)", 'Find_preview')
-    }
-    create = {
-        'Read_before_preview': read_item(),
-        'Require_same_preview': check("@and(equals(body('Read_before_preview')?['d']?['Active'],true),equals(body('Read_before_preview')?['d']?['__metadata']?['etag'],body('Read_current')?['d']?['__metadata']?['etag']))", 'Read_before_preview'),
-        'Try_create_preview': scope({'Create_preview': api('PostItem', {
-            'dataset': res('notificationHistory','siteUrl'), 'table': res('notificationHistory','listId'),
-            'item/Title': "@outputs('Compose_key')", 'item/NotificationKey': "@outputs('Compose_key')",
-            'item/RegisterItemIdentity': "@string(items('For_each_document')?['ID'])",
-            'item/ReviewCycleDueDate': "@outputs('Compose_due')", 'item/RuleThreshold': "@outputs('Compose_status')",
-            'item/IntendedRecipient': "@outputs('Compose_recipient')", 'item/OutcomeState': {'Value': 'Preview'},
-            'item/AttemptTime': '@utcNow()', 'item/SafeRunDetails': "@concat('Preview only; no email sent. Run=',workflow()?['run']?['name'],'; intended live recipients=',join(body('Parse_Notifications')?['liveRecipients'],';'))"
-        }, retry=False)}, 'Require_same_preview'),
-        'Mark_preview_created': setvar('ItemState','Succeeded','Try_create_preview'),
-        'Recover_preview_create': scope({
-            'Requery_preview': api('GetItems', {'dataset': res('notificationHistory','siteUrl'), 'table': res('notificationHistory','listId'), '$filter': "NotificationKey eq '@{replace(outputs('Compose_key'),'''','''''')}'", '$top': 2}),
-            'Require_recovered_preview': check("@equals(length(body('Requery_preview')?['value']),1)",'Requery_preview'),
-            'Mark_preview_recovered': setvar('ItemState','Skipped','Require_recovered_preview')
-        },'Try_create_preview',['Failed','TimedOut'])
-    }
-    eligible['Create_or_suppress'] = condition("@equals(length(body('Find_preview')?['value']),0)",create,after='Require_unique_preview')
-    a['If_reminder_due'] = condition("@or(equals(outputs('Compose_status'),'Due Soon'),equals(outputs('Compose_status'),'Overdue'))",eligible,after='Require_current_schedule')
-    return a
+    # Kept in a separate module so email delivery can be reviewed independently.
+    from brms_reminder import build_reminder
+    from types import SimpleNamespace
+    return build_reminder(SimpleNamespace(**globals()))
 
 
 def source_item():
@@ -228,7 +204,7 @@ def workflow(function, hour, item_actions):
         'Fail_if_work_failed':condition("@equals(outputs('Compose_result'),'Failed')",{'End_failed':action('Terminate',{'runStatus':'Failed','runError':{'code':'BRMS_VALIDATION_FAILED','message':'BRMS processing failed. See the actual flow run and BRMS Automation Run History.'}})},after='Record_run')
     }
     a['Finalize']=scope(finish,'Work',ALL)
-    return {'schemaVersion':'1.0.0.0','properties':{'connectionReferences':{'shared_sharepointonline':{'api':{'name':'shared_sharepointonline'},'connection':{'connectionReferenceLogicalName':'cr1e9_BRMSSharePoint'},'runtimeSource':'embedded'}},
+    return {'schemaVersion':'1.0.0.0','properties':{'connectionReferences':({**({'shared_office365':{'api':{'name':'shared_office365'},'connection':{'connectionReferenceLogicalName':'cr1e9_BRMSOutlook'},'runtimeSource':'embedded'}} if function=='Review Reminders' else {}),'shared_sharepointonline':{'api':{'name':'shared_sharepointonline'},'connection':{'connectionReferenceLogicalName':'cr1e9_BRMSSharePoint'},'runtimeSource':'embedded'}}),
         'definition':{'metadata':{'defaultToEmbeddedConnections':True},'$schema':'https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#','contentVersion':'1.0.0.0',
             'parameters':{'$authentication':{'type':'SecureObject','defaultValue':{}},'$connections':{'type':'Object','defaultValue':{}}},
             'triggers':{'Recurrence':{'type':'Recurrence','recurrence':{'frequency':'Day','interval':1,'timeZone':'Eastern Standard Time','schedule':{'hours':[str(hour)],'minutes':[0]}},'runtimeConfiguration':{'concurrency':{'runs':1}}}},'actions':a,'outputs':{}}}}

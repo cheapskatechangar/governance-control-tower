@@ -36,6 +36,6 @@
     </Workflow>
   </Workflows>
   <FieldSecurityProfiles></FieldSecurityProfiles><Templates /><EntityMaps /><EntityRelationships /><OrganizationSettings /><optionsets /><CustomControls /><EntityDataProviders />
-  <connectionreferences><connectionreference connectionreferencelogicalname="cr1e9_BRMSSharePoint"><connectionreferencedisplayname>BRMS SharePoint</connectionreferencedisplayname><connectorid>/providers/Microsoft.PowerApps/apis/shared_sharepointonline</connectorid><iscustomizable>1</iscustomizable><promptingbehavior>0</promptingbehavior><statecode>0</statecode><statuscode>1</statuscode></connectionreference></connectionreferences>
+  <connectionreferences><connectionreference connectionreferencelogicalname="cr1e9_BRMSSharePoint"><connectionreferencedisplayname>BRMS SharePoint</connectionreferencedisplayname><connectorid>/providers/Microsoft.PowerApps/apis/shared_sharepointonline</connectorid><iscustomizable>1</iscustomizable><promptingbehavior>0</promptingbehavior><statecode>0</statecode><statuscode>1</statuscode></connectionreference><connectionreference connectionreferencelogicalname="cr1e9_BRMSOutlook"><connectionreferencedisplayname>BRMS Outlook</connectionreferencedisplayname><connectorid>/providers/Microsoft.PowerApps/apis/shared_office365</connectorid><iscustomizable>1</iscustomizable><promptingbehavior>0</promptingbehavior><statecode>0</statecode><statuscode>1</statuscode></connectionreference></connectionreferences>
   <Languages><Language>1033</Language></Languages>
 </ImportExportXml>

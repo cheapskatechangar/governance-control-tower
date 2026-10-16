@@ -92,9 +92,12 @@
       ],
       "overdueRepeatDays": 7,
       "recipientRule": null,
-      "configurationStatus": "cadence-approved-delivery-not-implemented",
+      "configurationStatus": "cadence-and-test-delivery-verified-production-pending",
       "cadenceApproval": "approved",
-      "cadenceApprovalDate": "2026-10-15"
+      "cadenceApprovalDate": "2026-10-15",
+      "testEmailEnabled": false,
+      "testItemIds": [],
+      "outboundRemindersEnabled": false
     },
     "reviewRules": {
       "calendarMonthsByFrequency": {

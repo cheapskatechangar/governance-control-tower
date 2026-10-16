@@ -1,8 +1,8 @@
 # BRMS Power Automate implementation and creation status
 
-Current update (2026-10-15 Eastern / 2026-10-16 UTC): all three unsuffixed BRMS flows exist in `ELS-Operations-Prod` (`2c2b2f3f-eec6-ea9e-a492-7114c0975e11`). Solution `1.0.0.8` is installed. Refresh, source monitoring and reminder preview ran successfully; a repeat reminder produced zero new previews. Five offline structural tests pass. Business-date handling was corrected and verified live. All schedules are Off, processing remains synthetic-only and notifications remain preview-only. Remaining work is production acceptance and live reminder implementation/cadence, not flow creation or import. See [current browser deployment evidence](brms-browser-deployment.md).
-Reminder cadence approved by the project owner on 2026-10-15: 30, 14 and 7 days before review, on the due date, then weekly while overdue. Recorded in live BRMS Configuration; implementation and delivery testing remain. See [the cadence decision](brms-reminder-cadence.md).
+Current update (2026-10-16): solution `1.0.0.10` is installed in `ELS-Operations-Prod` (`2c2b2f3f-eec6-ea9e-a492-7114c0975e11`). All three unsuffixed BRMS flows exist. The approved 30/14/7/0-day and weekly-overdue cadence is implemented. Two controlled test emails were accepted by Outlook and persisted as Sent; a repeat run sent zero duplicates. Nine offline tests pass. All schedules are Off and preview/synthetic controls are restored. See [email delivery evidence](brms-email-delivery.md) and [browser deployment evidence](brms-browser-deployment.md).
 
+Remaining: recipient confirmation of appearance and links, escalation destination/threshold, wider production routing and the outstanding negative/concurrency/source acceptance cases. BRMS is not yet a completed production rollout. Flow creation/import is no longer the blocker.
 
 The following implementation and enforcement notes are historical. The old environment's checker failure must not be used as the current target's diagnosis without fresh evidence. The native browser package uses a different generator and the existing resource-map configuration contract.
 

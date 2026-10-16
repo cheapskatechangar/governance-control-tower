@@ -12,14 +12,18 @@ Administrative metadata only. BRMS artifacts must remain unsuffixed.
 | Dataverse environment URL | Pending live verification; do not reuse the previous environment URL |
 | Solution unique name | `BRMSGovernanceControlTower` |
 | Solution display name | `BRMS Governance Control Tower` |
-| Current browser-import version | `1.0.0.8` |
-| Package validation | Five offline structural tests pass; basic live synthetic checks pass; production acceptance pending |
+| Current browser-import version | `1.0.0.10` |
+| Package validation | Nine offline tests pass; two live test sends and repeat suppression verified; production acceptance pending |
 
-## Browser deployment, 2026-10-15
+## Current email deployment, 2026-10-16
+
+Version 1.0.0.10 imported through the maker portal and activated successfully with BRMS SharePoint and BRMS Outlook connection references. Two synthetic test emails were logged as Sent; a repeat run created zero new sends. All schedules are Off and test delivery is disabled again. See [email implementation and run evidence](brms-email-delivery.md). Version 1.0.0.9 imported but failed activation at nine nesting levels; 1.0.0.10 corrects that package issue.
+
+## Earlier browser deployment, 2026-10-15
 
 The owner requested browser interaction instead of PowerShell. The maker portal authenticated successfully in the new target, accepted version `1.0.0.6`, and displayed a valid existing SharePoint connection for `cr1e9_BRMSSharePoint`. Versions 1.0.0.6, 1.0.0.7 and 1.0.0.8 imported successfully through the supported UI. All three flows now exist and have successful synthetic execution evidence. Repeat reminder deduplication passed. Schedules are Off after testing; production acceptance and live reminder implementation remain. The current result and remaining acceptance work are tracked in [browser deployment evidence](brms-browser-deployment.md).
 
-The current native generator is `scripts/build_brms_browser_package.py`. It emits native workflow actions, reads the existing `resource-map-v2`, `review-rules-v1`, and `notification-settings-v1` contract, and resolves source mappings from `resource-map-v2.sourceLibraries`. It does **not** require a separate `source-library-map-v1` row. All three flows are packaged disabled and gated to synthetic preview validation. The historical PowerShell generator and its tests below describe an older package, not acceptance evidence for the current native package.
+The current native generator is `scripts/build_brms_browser_package.py`. It emits native workflow actions, reads the existing `resource-map-v2`, `review-rules-v1`, and `notification-settings-v1` contract, and resolves source mappings from `resource-map-v2.sourceLibraries`. It does **not** require a separate `source-library-map-v1` row. All three flows are packaged disabled and gated to synthetic validation. Email test mode additionally requires an explicit two-item allowlist and a single configured test recipient; preview mode sends no email. The historical PowerShell generator and its tests below describe an older package, not acceptance evidence for the current native package.
 
 ```bash
 python scripts/build_brms_browser_package.py --output /path/outside/repository
@@ -67,7 +71,7 @@ These are structural refinements that align our workflow JSON with the tenant's 
 
 ## Current deployment path
 
-Flow creation and import are complete in target `2c2b2f3f-eec6-ea9e-a492-7114c0975e11`. Continue the remaining boundary/failure-path acceptance listed in the current evidence document, then implement and test the approved 30/14/7/0-day reminder cadence with a 7-day overdue repeat before removing preview/synthetic gates. See [the cadence decision](brms-reminder-cadence.md). The old environment's enforcement failure is retained as historical evidence, not an active diagnosis for this environment.
+Flow creation and import are complete in target `2c2b2f3f-eec6-ea9e-a492-7114c0975e11`. Continue the remaining boundary/failure-path acceptance listed in the current evidence document, confirm the two delivered test templates with the recipient, define manager escalation routing/threshold, and implement wider production routing before removing preview/synthetic gates. The approved cadence is implemented and controlled delivery/repeat suppression passed. See [the cadence decision](brms-reminder-cadence.md). The old environment's enforcement failure is retained as historical evidence, not an active diagnosis for this environment.
 
 If this target rejects an import, capture its own operation ID and exact error, resolve actionable package findings, and escalate environment policy or service failures to the administrator. Do not disable enforcement or repeatedly import an unchanged rejected package.
 

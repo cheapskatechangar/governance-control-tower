@@ -3,7 +3,7 @@
     <UniqueName>BRMSGovernanceControlTower</UniqueName>
     <LocalizedNames><LocalizedName description="BRMS Governance Control Tower" languagecode="1033" /></LocalizedNames>
     <Descriptions />
-    <Version>1.0.0.8</Version>
+    <Version>1.0.0.10</Version>
     <Managed>0</Managed>
     <Publisher><UniqueName>Cr115e7</UniqueName><LocalizedNames><LocalizedName description="CDS Default Publisher" languagecode="1033" /></LocalizedNames><Descriptions /><CustomizationPrefix>cr1e9</CustomizationPrefix><CustomizationOptionValuePrefix>88894</CustomizationOptionValuePrefix><Addresses /></Publisher>
     <RootComponents>
