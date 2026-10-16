@@ -67,7 +67,7 @@ These are structural refinements that align our workflow JSON with the tenant's 
 
 ## Current deployment path
 
-Flow creation and import are complete in target `2c2b2f3f-eec6-ea9e-a492-7114c0975e11`. Continue the remaining boundary/failure-path acceptance listed in the current evidence document, then implement and agree the live reminder cadence before removing preview/synthetic gates. The old environment's enforcement failure is retained as historical evidence, not an active diagnosis for this environment.
+Flow creation and import are complete in target `2c2b2f3f-eec6-ea9e-a492-7114c0975e11`. Continue the remaining boundary/failure-path acceptance listed in the current evidence document, then implement and test the approved 30/14/7/0-day reminder cadence with a 7-day overdue repeat before removing preview/synthetic gates. See [the cadence decision](brms-reminder-cadence.md). The old environment's enforcement failure is retained as historical evidence, not an active diagnosis for this environment.
 
 If this target rejects an import, capture its own operation ID and exact error, resolve actionable package findings, and escalate environment policy or service failures to the administrator. Do not disable enforcement or repeatedly import an unchanged rejected package.
 

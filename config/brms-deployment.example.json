@@ -84,10 +84,17 @@
     "notifications": {
       "mode": "preview",
       "testRecipients": [],
-      "reminderOffsetsDays": [],
-      "overdueRepeatDays": null,
+      "reminderOffsetsDays": [
+        30,
+        14,
+        7,
+        0
+      ],
+      "overdueRepeatDays": 7,
       "recipientRule": null,
-      "configurationStatus": "unresolved"
+      "configurationStatus": "cadence-approved-delivery-not-implemented",
+      "cadenceApproval": "approved",
+      "cadenceApprovalDate": "2026-10-15"
     },
     "reviewRules": {
       "calendarMonthsByFrequency": {

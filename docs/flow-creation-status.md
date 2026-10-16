@@ -1,6 +1,8 @@
 # BRMS Power Automate implementation and creation status
 
 Current update (2026-10-15 Eastern / 2026-10-16 UTC): all three unsuffixed BRMS flows exist in `ELS-Operations-Prod` (`2c2b2f3f-eec6-ea9e-a492-7114c0975e11`). Solution `1.0.0.8` is installed. Refresh, source monitoring and reminder preview ran successfully; a repeat reminder produced zero new previews. Five offline structural tests pass. Business-date handling was corrected and verified live. All schedules are Off, processing remains synthetic-only and notifications remain preview-only. Remaining work is production acceptance and live reminder implementation/cadence, not flow creation or import. See [current browser deployment evidence](brms-browser-deployment.md).
+Reminder cadence approved by the project owner on 2026-10-15: 30, 14 and 7 days before review, on the due date, then weekly while overdue. Recorded in live BRMS Configuration; implementation and delivery testing remain. See [the cadence decision](brms-reminder-cadence.md).
+
 
 The following implementation and enforcement notes are historical. The old environment's checker failure must not be used as the current target's diagnosis without fresh evidence. The native browser package uses a different generator and the existing resource-map configuration contract.
 

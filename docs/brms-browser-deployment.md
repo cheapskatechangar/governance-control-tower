@@ -85,7 +85,7 @@ The current generator is `scripts/build_brms_browser_package.py`, with solution 
 
 The live resource map was updated with the new environment, explicit site URLs and `powerAutomate.validationScope = synthetic-records-only`. Processing requires both the `BRMS-TEST-` title prefix and the `BRMS Test` department. Item rereads and conditional ETag writes prevent overwriting a concurrently edited register record. Conflicts are surfaced for investigation; broader retry/revalidation acceptance remains pending.
 
-Notification settings were saved and reread: enabled for preview processing, `mode = preview`, `outboundRemindersEnabled = false`. Test and intended live recipients are recorded in the restricted BRMS Configuration and implementation Loop page. The existing cadence was preserved and marked pending owner agreement. The package contains no email send action. Preview eligibility is a due/overdue candidate check, not implementation or approval of the final live reminder cadence.
+Notification settings were saved and reread: enabled for preview processing, `mode = preview`, `outboundRemindersEnabled = false`. Test and intended live recipients are recorded in the restricted BRMS Configuration and implementation Loop page. On 2026-10-15 at 22:36 Eastern, the project owner explicitly approved reminders 30, 14 and 7 days before review, on the due date, then every 7 days overdue. Live `notification-settings-v1` now records offsets `[30,14,7,0]`, `overdueRepeatDays = 7` and `cadenceApproval = approved`. Weekly overdue periods are anchored to the due date (7, 14, 21 days overdue and onward). This decision is recorded in [the cadence decision](brms-reminder-cadence.md). Installed version 1.0.0.8 still contains no email send action and uses generic due/overdue preview eligibility. The approved cadence must be implemented and verified before outbound enablement.
 
 ## Verification performed
 
@@ -100,6 +100,6 @@ These are structural checks. They do not execute Power Automate expressions, val
 3. Preview after a current refresh and repeat-run deduplication passed. Still test the negative refresh gate and simultaneous-create recovery.
 4. Mapped source resolution and unmapped/inactive skips passed. Still test a newly edited source, a missing/inaccessible file, independent sites and error accounting.
 5. Run IDs and persisted SharePoint counts are recorded above. Complete the remaining failure-path and boundary cases before declaring production acceptance.
-6. Deliberately remove synthetic scope only after acceptance and reconcile the implementation with production requirements. Agree and implement live reminder cadence before any outbound enablement.
+6. Deliberately remove synthetic scope only after acceptance and reconcile the implementation with production requirements. Implement and test the owner-approved reminder cadence and outbound delivery before enablement.
 
 The implementation Loop page records the new target, recipients, preview scope, import milestones and runtime evidence. Its current overview status and environment ID were corrected, preserving the historical log. Its private sharing URL is intentionally kept out of this repository.
