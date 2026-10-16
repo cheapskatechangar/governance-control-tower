@@ -97,7 +97,16 @@
       "cadenceApprovalDate": "2026-10-15",
       "testEmailEnabled": false,
       "testItemIds": [],
-      "outboundRemindersEnabled": false
+      "outboundRemindersEnabled": false,
+      "escalation": {
+        "enabled": true,
+        "recipientRule": "ownerManager",
+        "startAfterDays": 14,
+        "repeatDays": 7,
+        "copyOwner": true,
+        "fallbackRecipient": "",
+        "approval": "approved"
+      }
     },
     "reviewRules": {
       "calendarMonthsByFrequency": {

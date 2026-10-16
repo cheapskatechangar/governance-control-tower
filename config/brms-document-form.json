@@ -1,35 +1,37 @@
 {
   "sections": [
     {
-      "displayname": "1. Document Details",
+      "displayname": "1. Document details",
       "fields": [
         "Document Name",
-        "Document Link",
         "Document Type",
+        "Document Link",
         "Department"
       ]
     },
     {
-      "displayname": "2. Assignment & Accountability",
+      "displayname": "2. Ownership and accountability",
       "fields": [
         "Owner",
         "Reviewer",
+        "Active"
+      ]
+    },
+    {
+      "displayname": "3. Review settings",
+      "fields": [
+        "Last Reviewed Date",
+        "Review Frequency",
         "Notes"
       ]
     },
     {
-      "displayname": "ACTION REQUIRED: UPDATE REVIEW DATE",
+      "displayname": "4. Automation results | maintained by BRMS",
       "fields": [
-        "Last Reviewed Date"
-      ]
-    },
-    {
-      "displayname": "3. Review Schedule (System Calculated)",
-      "fields": [
-        "Review Frequency",
         "Next Review Due",
+        "Days to Review",
         "Status",
-        "Days to Review"
+        "Source Modified Date"
       ]
     }
   ]

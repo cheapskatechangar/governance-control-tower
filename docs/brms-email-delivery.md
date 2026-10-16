@@ -1,6 +1,10 @@
 # BRMS email delivery implementation
 
-Package 1.0.0.10 adds the approved 30/14/7/0-day cadence and weekly overdue occurrences to the native browser-import generator. It includes an Outlook HTML reminder and an overdue/escalation appearance preview. Manager escalation recipients and threshold are not yet defined, so there is no live manager route.
+Package 1.0.0.10 adds the approved 30/14/7/0-day cadence and weekly overdue occurrences to the native browser-import generator. It includes an Outlook HTML reminder and an overdue/escalation appearance preview. This earlier baseline is superseded by version 1.0.0.11 manager routing intent below.
+
+## Current update, 2026-10-16
+
+Solution 1.0.0.11 is installed. Owner-manager escalation intent is implemented and validated at 14 days overdue, repeating weekly with owner Cc. One controlled escalation email was accepted by Outlook for the test recipient; the repeat run produced zero new sends and zero failures. Eleven offline tests pass. All schedules are Off and preview controls are restored. Production outbound remains disabled and processing remains synthetic-only. See [manager escalation evidence](brms-manager-escalation.md). The [governance form layout](brms-form-layout.md) is updated live and visually verified.
 
 ## Test delivery controls
 
@@ -12,7 +16,7 @@ The flow rereads notification configuration and the register item immediately be
 
 ## Validation
 
-Nine offline tests pass, including emitted cadence expression boundary cases, action dependencies, claim/send ordering, failure handling, conditional writes, template escaping, platform nesting depth and basic accessibility. These tests do not emulate all Power Automate expression behavior or verify Outlook rendering.
+Eleven offline tests pass, including emitted cadence expression boundary cases, action dependencies, claim/send ordering, failure handling, conditional writes, template escaping, platform nesting depth and basic accessibility. These tests do not emulate all Power Automate expression behavior or verify Outlook rendering.
 
 ## Preview artifacts
 
@@ -43,6 +47,6 @@ The repeat reminder run `08584094478049428163787803733CU15` succeeded in 27 seco
 
 Final controls: all schedules Off, `mode=preview`, `testEmailEnabled=false`, `testItemIds=[]`, `outboundRemindersEnabled=false`; synthetic scope remains enforced. The saved configuration was reread. Intended live recipient settings were preserved but never used by this test.
 
-Subjects were `[BRMS TEST] Review reminder: BRMS-TEST-EMAIL-REMINDER | Due 2026-11-15` and `[BRMS TEST] Overdue review: BRMS-TEST-EMAIL-OVERDUE | Due 2026-10-09`. The overdue example is an appearance preview, not implemented manager escalation. Next decisions: confirm inbox appearance and record-link behavior, then specify the escalation recipient and overdue threshold. Wider production routing and remaining failure-path acceptance are not complete.
+Subjects were `[BRMS TEST] Review reminder: BRMS-TEST-EMAIL-REMINDER | Due 2026-11-15` and `[BRMS TEST] Overdue review: BRMS-TEST-EMAIL-OVERDUE | Due 2026-10-09`. The overdue example is an appearance preview, not implemented manager escalation. At this historical checkpoint the manager policy was pending. Version 1.0.0.11 now implements the approved policy; see the current update above. Confirm inbox appearance and record-link behavior. Wider production routing and remaining failure-path acceptance are not complete.
 
 Package SHA-256: `e1b26ed5ede72974547d6fbeaf95df4064b6fca6b5056428184f45bb5f0c5eaa`.

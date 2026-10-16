@@ -12,10 +12,14 @@ Administrative metadata only. BRMS artifacts must remain unsuffixed.
 | Dataverse environment URL | Pending live verification; do not reuse the previous environment URL |
 | Solution unique name | `BRMSGovernanceControlTower` |
 | Solution display name | `BRMS Governance Control Tower` |
-| Current browser-import version | `1.0.0.10` |
-| Package validation | Nine offline tests pass; two live test sends and repeat suppression verified; production acceptance pending |
+| Current browser-import version | `1.0.0.11` |
+| Package validation | Eleven offline tests pass; controlled manager escalation send and repeat suppression verified; production acceptance pending |
 
-## Current email deployment, 2026-10-16
+## Current manager escalation and form update, 2026-10-16
+
+Solution 1.0.0.11 is installed. Owner-manager escalation intent is implemented and validated at 14 days overdue, repeating weekly with owner Cc. One controlled escalation email was accepted by Outlook for the test recipient; the repeat run produced zero new sends and zero failures. Eleven offline tests pass. All schedules are Off and preview controls are restored. Production outbound remains disabled and processing remains synthetic-only. See [manager escalation evidence](brms-manager-escalation.md). The [governance form layout](brms-form-layout.md) is updated live and visually verified.
+
+## Earlier email deployment, 2026-10-16
 
 Version 1.0.0.10 imported through the maker portal and activated successfully with BRMS SharePoint and BRMS Outlook connection references. Two synthetic test emails were logged as Sent; a repeat run created zero new sends. All schedules are Off and test delivery is disabled again. See [email implementation and run evidence](brms-email-delivery.md). Version 1.0.0.9 imported but failed activation at nine nesting levels; 1.0.0.10 corrects that package issue.
 

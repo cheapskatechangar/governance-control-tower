@@ -91,7 +91,7 @@ class BrowserPackageTests(unittest.TestCase):
                 if action['type'] != 'OpenApiConnection':
                     continue
                 inputs = action['inputs']
-                self.assertIn(inputs['host']['apiId'], ['/providers/Microsoft.PowerApps/apis/shared_sharepointonline','/providers/Microsoft.PowerApps/apis/shared_office365'])
+                self.assertIn(inputs['host']['apiId'], ['/providers/Microsoft.PowerApps/apis/shared_sharepointonline','/providers/Microsoft.PowerApps/apis/shared_office365','/providers/Microsoft.PowerApps/apis/shared_office365users'])
                 if inputs['host']['operationId'] == 'SendEmailV2':
                     self.assertEqual(inputs['retryPolicy'], {'type':'none'})
                     self.assertEqual(inputs['parameters']['emailMessage/To'], "@outputs('Compose_recipient')")
@@ -173,6 +173,32 @@ class BrowserPackageTests(unittest.TestCase):
         self.assertIn("['Modified']",actions['Require_unchanged_settings']['inputs']['content'])
         self.assertIn("['etag']",actions['Require_unchanged_send']['inputs']['content'])
         self.assertIn("['EnforceUniqueValues']",actions['Require_unique_notification_key']['inputs']['content'])
+
+    def test_escalation_boundaries(self):
+        from brms_routing import ESCALATION
+        funcs={'and_':lambda *v:all(v),'lessOrEquals':lambda a,b:a<=b,'int':int,'mul':lambda a,b:a*b,'equals':lambda a,b:a==b,'mod':lambda a,b:a%b,'sub':lambda a,b:a-b}
+        for days in [30,0,-1,-7,-13,-14,-15,-20,-21,-22,-27,-28,-35]:
+            expr=ESCALATION[1:].replace("outputs('Compose_days')",str(days)).replace("body('Parse_Notifications')?['escalation']?['startAfterDays']",'14').replace("body('Parse_Notifications')?['escalation']?['repeatDays']",'7').replace('and(','and_(')
+            self.assertEqual(eval(expr,{'__builtins__':{}},funcs),days in {-14,-21,-28,-35})
+
+    def test_manager_routing_and_test_isolation(self):
+        actions = dict(walk(self.flows['Review Reminders']['properties']['definition']['actions']))
+        self.assertIn('OwnerId',actions['Read_current']['inputs']['parameters']['parameters/uri'])
+        manager=actions['Get_owner_manager']['inputs']
+        self.assertEqual(manager['host']['operationId'],'Manager_V2')
+        self.assertEqual(manager['parameters']['id'],"@outputs('Compose_owner_upn')")
+        self.assertEqual(manager['parameters']['$select'],'id,displayName,mail,userPrincipalName')
+        self.assertIn('14',actions['Require_escalation_policy']['inputs']['content'])
+        self.assertIn('7',actions['Require_escalation_policy']['inputs']['content'])
+        self.assertEqual(actions['Handle_manager_lookup_failure']['runAfter'],{'Get_owner_manager':['Failed','TimedOut']})
+        self.assertIn("'404'",actions['Handle_manager_lookup_failure']['inputs']['value']['to'])
+        self.assertIn('manager-lookup-failed',actions['Require_resolved_route']['inputs']['content'])
+        self.assertEqual(actions['Compose_occurrence']['runAfter'],{'Compose_route_description':['Succeeded']})
+        self.assertIn('escalation-',actions['Compose_occurrence']['inputs'])
+        actual=actions['Send_test_email']['inputs']['parameters']
+        self.assertEqual(actual['emailMessage/To'],"@outputs('Compose_recipient')")
+        self.assertNotIn('emailMessage/Cc',actual)
+        self.assertIn('routingStatus',actions['Record_one_outcome']['inputs']['value'])
 
     def test_email_template_escaping_and_accessibility(self):
         from brms_email import render,sample_values

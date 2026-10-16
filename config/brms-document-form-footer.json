@@ -1,0 +1,41 @@
+{
+  "elmType": "div",
+  "style": {
+    "background-color": "#f4f7fa",
+    "border-left": "4px solid #eb8d23",
+    "padding": "16px 20px",
+    "margin-top": "16px",
+    "border-radius": "4px",
+    "display": "flex",
+    "flex-direction": "column"
+  },
+  "children": [
+    {
+      "elmType": "div",
+      "style": {
+        "font-weight": "600",
+        "color": "#142b40",
+        "font-size": "15px"
+      },
+      "txtContent": "Completing a review?"
+    },
+    {
+      "elmType": "div",
+      "style": {
+        "margin-top": "6px",
+        "color": "#334155",
+        "font-size": "13px"
+      },
+      "txtContent": "Update Last Reviewed Date only after the review is complete. Confirm the owner, review frequency and document link, then save."
+    },
+    {
+      "elmType": "div",
+      "style": {
+        "margin-top": "8px",
+        "color": "#334155",
+        "font-size": "13px"
+      },
+      "txtContent": "Leave Automation results to BRMS. Due dates, days remaining and status are updated when the scheduled refresh runs. Document edits alone do not complete a review."
+    }
+  ]
+}

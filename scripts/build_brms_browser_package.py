@@ -17,7 +17,7 @@ SITE = 'https://reedelsevier.sharepoint.com/sites/ELSBUProjects/BRMS'
 ENV = '2c2b2f3f-eec6-ea9e-a492-7114c0975e11'
 CONFIG = '8a5524c7-01bd-4608-899f-62281313a8c6'
 RUNS = 'f0f62faf-86bb-4257-9c0d-f4f8571e71e2'
-VERSION = '1.0.0.10'
+VERSION = '1.0.0.11'
 ALL = ['Succeeded', 'Failed', 'TimedOut', 'Skipped']
 
 
@@ -84,7 +84,7 @@ def http(site, uri, after=None, method='GET', body=None, headers=None, retry=Tru
 
 
 def item_uri(read=False):
-    suffix = '?$select=Id,Title,Department,Active,Modified,LastReviewedDate,ReviewFrequency,NextReviewDue,DaysToReview,Status,DocumentLink,SourceModifiedDate' if read else ''
+    suffix = '?$select=Id,Title,Department,Active,Modified,LastReviewedDate,ReviewFrequency,NextReviewDue,DaysToReview,Status,DocumentLink,SourceModifiedDate,OwnerId' if read else ''
     return "@concat('_api/web/lists(guid''',variables('Resources')?['governanceRegister']?['listId'],''')/items(',string(items('For_each_document')?['ID']),')" + suffix + "')"
 
 
@@ -166,7 +166,7 @@ def source_item():
 def workflow(function, hour, item_actions):
     a = {}
     previous = None
-    for name, typ, value in [('Started','String','@utcNow()'),('Outcomes','Array',[]),('ItemState','String','Skipped'),('Context','String','bootstrap-unresolved'),('Resources','Object',{'automationRunHistory':{'siteUrl':SITE,'listId':RUNS}})]:
+    for name, typ, value in [('Started','String','@utcNow()'),('Outcomes','Array',[]),('ItemState','String','Skipped'),('Context','String','bootstrap-unresolved'),('Route','Object',{}),('Resources','Object',{'automationRunHistory':{'siteUrl':SITE,'listId':RUNS}})]:
         key='Init_'+name
         a[key]=action('InitializeVariable',{'variables':[{'name':name,'type':typ.lower(),'value':value}]},previous)
         previous=key
@@ -185,8 +185,8 @@ def workflow(function, hour, item_actions):
     work['Require_all_acceptance_records']=check("@greater(length(body('Select_acceptance_records')),0)",'Select_acceptance_records')
     process={'Read_current':read_item(), 'If_still_active':condition("@and(equals(body('Read_current')?['d']?['Active'],true),startsWith(body('Read_current')?['d']?['Title'],'BRMS-TEST-'),equals(body('Read_current')?['d']?['Department'],'BRMS Test'))",item_actions,after='Read_current')}
     work['For_each_document']=action('Foreach',after='Require_all_acceptance_records',foreach="@body('Select_acceptance_records')",runtimeConfiguration={'concurrency':{'repetitions':1}},actions={
-        'Reset_item_state':setvar('ItemState','Skipped'), 'Process_document':scope(process,'Reset_item_state'),
-        'Record_one_outcome':action('AppendToArrayVariable',{'name':'Outcomes','value':{'id':"@items('For_each_document')?['ID']",'state':"@if(equals(actions('Process_document')?['status'],'Succeeded'),variables('ItemState'),'Failed')"}},'Process_document',ALL)
+        'Reset_item_state':setvar('ItemState','Skipped'), 'Reset_route':setvar('Route',{},'Reset_item_state'), 'Process_document':scope(process,'Reset_route'),
+        'Record_one_outcome':action('AppendToArrayVariable',{'name':'Outcomes','value':{'id':"@items('For_each_document')?['ID']",'state':"@if(equals(actions('Process_document')?['status'],'Succeeded'),variables('ItemState'),'Failed')",'routingStatus':"@coalesce(variables('Route')?['status'],'not-evaluated')"}},'Process_document',ALL)
     })
     a['Work']=scope(work,previous)
     finish={
@@ -204,7 +204,7 @@ def workflow(function, hour, item_actions):
         'Fail_if_work_failed':condition("@equals(outputs('Compose_result'),'Failed')",{'End_failed':action('Terminate',{'runStatus':'Failed','runError':{'code':'BRMS_VALIDATION_FAILED','message':'BRMS processing failed. See the actual flow run and BRMS Automation Run History.'}})},after='Record_run')
     }
     a['Finalize']=scope(finish,'Work',ALL)
-    return {'schemaVersion':'1.0.0.0','properties':{'connectionReferences':({**({'shared_office365':{'api':{'name':'shared_office365'},'connection':{'connectionReferenceLogicalName':'cr1e9_BRMSOutlook'},'runtimeSource':'embedded'}} if function=='Review Reminders' else {}),'shared_sharepointonline':{'api':{'name':'shared_sharepointonline'},'connection':{'connectionReferenceLogicalName':'cr1e9_BRMSSharePoint'},'runtimeSource':'embedded'}}),
+    return {'schemaVersion':'1.0.0.0','properties':{'connectionReferences':({**({'shared_office365users':{'api':{'name':'shared_office365users'},'connection':{'connectionReferenceLogicalName':'cr1e9_BRMSDirectory'},'runtimeSource':'embedded'},'shared_office365':{'api':{'name':'shared_office365'},'connection':{'connectionReferenceLogicalName':'cr1e9_BRMSOutlook'},'runtimeSource':'embedded'}} if function=='Review Reminders' else {}),'shared_sharepointonline':{'api':{'name':'shared_sharepointonline'},'connection':{'connectionReferenceLogicalName':'cr1e9_BRMSSharePoint'},'runtimeSource':'embedded'}}),
         'definition':{'metadata':{'defaultToEmbeddedConnections':True},'$schema':'https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#','contentVersion':'1.0.0.0',
             'parameters':{'$authentication':{'type':'SecureObject','defaultValue':{}},'$connections':{'type':'Object','defaultValue':{}}},
             'triggers':{'Recurrence':{'type':'Recurrence','recurrence':{'frequency':'Day','interval':1,'timeZone':'Eastern Standard Time','schedule':{'hours':[str(hour)],'minutes':[0]}},'runtimeConfiguration':{'concurrency':{'runs':1}}}},'actions':a,'outputs':{}}}}

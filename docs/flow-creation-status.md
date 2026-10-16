@@ -1,8 +1,8 @@
 # BRMS Power Automate implementation and creation status
 
-Current update (2026-10-16): solution `1.0.0.10` is installed in `ELS-Operations-Prod` (`2c2b2f3f-eec6-ea9e-a492-7114c0975e11`). All three unsuffixed BRMS flows exist. The approved 30/14/7/0-day and weekly-overdue cadence is implemented. Two controlled test emails were accepted by Outlook and persisted as Sent; a repeat run sent zero duplicates. Nine offline tests pass. All schedules are Off and preview/synthetic controls are restored. See [email delivery evidence](brms-email-delivery.md) and [browser deployment evidence](brms-browser-deployment.md).
+Current update (2026-10-16): Solution 1.0.0.11 is installed. Owner-manager escalation intent is implemented and validated at 14 days overdue, repeating weekly with owner Cc. One controlled escalation email was accepted by Outlook for the test recipient; the repeat run produced zero new sends and zero failures. Eleven offline tests pass. All schedules are Off and preview controls are restored. Production outbound remains disabled and processing remains synthetic-only. See [manager escalation evidence](brms-manager-escalation.md). The [governance form layout](brms-form-layout.md) is updated live and visually verified.
 
-Remaining: recipient confirmation of appearance and links, escalation destination/threshold, wider production routing and the outstanding negative/concurrency/source acceptance cases. BRMS is not yet a completed production rollout. Flow creation/import is no longer the blocker.
+Remaining: inbox appearance/link confirmation, fallback contact decision, wider production routing and negative/concurrency/source acceptance. Flow creation/import is no longer the blocker.
 
 The following implementation and enforcement notes are historical. The old environment's checker failure must not be used as the current target's diagnosis without fresh evidence. The native browser package uses a different generator and the existing resource-map configuration contract.
 

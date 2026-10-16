@@ -4,7 +4,7 @@ Date: 2026-10-16 (America/New_York).
 
 ## Current state
 
-Solution 1.0.0.10 is installed. The reminder flow implements the approved cadence and Outlook HTML test delivery. Two controlled emails were recorded as Sent; a repeat run produced zero new sends and zero failures. Nine offline tests pass. All three schedules are Off and preview-only settings are restored. Processing remains synthetic-only. This is not a completed production rollout. See [email delivery evidence](brms-email-delivery.md) for the current run IDs and controls. Earlier deployment evidence remains below.
+Solution 1.0.0.11 is installed. Owner-manager escalation intent is implemented and validated at 14 days overdue, repeating weekly with owner Cc. One controlled escalation email was accepted by Outlook for the test recipient; the repeat run produced zero new sends and zero failures. Eleven offline tests pass. All schedules are Off and preview controls are restored. Production outbound remains disabled and processing remains synthetic-only. See [manager escalation evidence](brms-manager-escalation.md). The [governance form layout](brms-form-layout.md) is updated live and visually verified.
 
 | Field | Observed value |
 |---|---|
@@ -12,16 +12,16 @@ Solution 1.0.0.10 is installed. The reminder flow implements the approved cadenc
 | Environment ID | `2c2b2f3f-eec6-ea9e-a492-7114c0975e11` |
 | Import method | Maker portal UI; no PowerShell or tenant API script |
 | Solution | BRMS Governance Control Tower |
-| Current installed version | `1.0.0.10` |
-| Current package SHA-256 | `e1b26ed5ede72974547d6fbeaf95df4064b6fca6b5056428184f45bb5f0c5eaa` |
-| Connection references | `cr1e9_BRMSSharePoint` and `cr1e9_BRMSOutlook`; maker wizard displayed Valid connection |
+| Current installed version | `1.0.0.11` |
+| Current package SHA-256 | `081a4d802eb8ef51fdb13206cacef81357a3093dea8cbf0a2604f92618209844` |
+| Connection references | `cr1e9_BRMSSharePoint`, `cr1e9_BRMSOutlook` and `cr1e9_BRMSDirectory`; maker wizard displayed Valid connection |
 | Historical 1.0.0.5 import activity ID | `246643ee-cb5f-486a-8b30-43d955b4c1f2` |
 | Version 1.0.0.5 import result | Failed after 5 m 20 sec, code `80060468`: missing root `schemaVersion` in workflow clientdata |
-| Current import result | Version 1.0.0.10 imported and activated successfully via the maker portal |
+| Current import result | Version 1.0.0.11 imported and activated successfully via the maker portal |
 | Solution ID | `197184d6-cf12-4c72-81fd-614952dad0be` |
 | Live run IDs | See verified synthetic runs below |
 
-The current SHA identifies the installed version 1.0.0.10 ZIP. Version 1.0.0.8 had SHA-256 `3f304682a5b24ddcdf525751895134956c372e95a04422fd209278cbaa508999`. Version 1.0.0.7 had SHA-256 `89d5cd122e7da6a51e0353f9ab1ebcd1ce1e1d6dd745f55549aa57aa258f88d2`. Version 1.0.0.6 had SHA-256 `7c27d897057889abf4d88c9870fbec489f942d1a85cabc4f969cdb64fc56f45a`. The rejected version 1.0.0.5 ZIP had SHA-256 `a2e899c3fb81b6a94f8cf74612f0c09ca39492e1525d8917f6126442c9392d10`. Version 1.0.0.6 adds root `schemaVersion = 1.0.0.0`, explicit connector authentication expressions, and regression assertions, following the [Microsoft clientdata example](https://learn.microsoft.com/en-us/power-automate/manage-flows-with-code). The new-target error is a package validation finding, not the old environment's RunSafeChecker error. Regenerating with ZIP timestamps can change the archive hash without changing flow content. The previous environment's enforcement failure is retained separately in the handoff.
+The current SHA identifies the installed version 1.0.0.11 ZIP. Version 1.0.0.8 had SHA-256 `3f304682a5b24ddcdf525751895134956c372e95a04422fd209278cbaa508999`. Version 1.0.0.7 had SHA-256 `89d5cd122e7da6a51e0353f9ab1ebcd1ce1e1d6dd745f55549aa57aa258f88d2`. Version 1.0.0.6 had SHA-256 `7c27d897057889abf4d88c9870fbec489f942d1a85cabc4f969cdb64fc56f45a`. The rejected version 1.0.0.5 ZIP had SHA-256 `a2e899c3fb81b6a94f8cf74612f0c09ca39492e1525d8917f6126442c9392d10`. Version 1.0.0.6 adds root `schemaVersion = 1.0.0.0`, explicit connector authentication expressions, and regression assertions, following the [Microsoft clientdata example](https://learn.microsoft.com/en-us/power-automate/manage-flows-with-code). The new-target error is a package validation finding, not the old environment's RunSafeChecker error. Regenerating with ZIP timestamps can change the archive hash without changing flow content. The previous environment's enforcement failure is retained separately in the handoff.
 
 ## Activation corrections in version 1.0.0.7
 
