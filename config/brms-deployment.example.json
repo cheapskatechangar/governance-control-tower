@@ -15,7 +15,7 @@
     "namingConstraint": "Single production deployment. Resource display names must not contain DEV or PROD environment labels."
   },
   "deployment": {
-    "powerAutomateEnvironmentId": null,
+    "powerAutomateEnvironmentId": "2c2b2f3f-eec6-ea9e-a492-7114c0975e11",
     "defaultResourceSiteUrl": "https://reedelsevier.sharepoint.com/sites/ELSBUProjects/BRMS",
     "businessTimeZone": null,
     "bootstrap": {

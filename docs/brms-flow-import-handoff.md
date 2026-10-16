@@ -6,17 +6,27 @@ Administrative metadata only. BRMS artifacts must remain unsuffixed.
 
 | Field | Value |
 |---|---|
-| Environment name | RIS-TechCentral-Low-DEV |
-| Environment ID | `722e9526-2b55-e3b0-8bfb-e4475649af19` |
-| Environment URL | `https://org734d2f31.crm.dynamics.com` |
+| Environment name | Pending live verification |
+| Environment ID | `2c2b2f3f-eec6-ea9e-a492-7114c0975e11` |
+| Power Automate | https://make.powerautomate.com/environments/2c2b2f3f-eec6-ea9e-a492-7114c0975e11/flows |
+| Dataverse environment URL | Pending live verification; do not reuse the previous environment URL |
 | Solution unique name | `BRMSGovernanceControlTower` |
 | Solution display name | `BRMS Governance Control Tower` |
 | Solution version | `1.0.0.4` |
 | Package validation | `tests/Test-BrmsFlowArtifacts.ps1` passes |
 
-## Confirmed root cause of the import block
+## Deployment target update
 
-The blocker is tenant/environment Managed Environments policy (`RunSafeChecker`), not our package content. Verified:
+On 2026-10-15 (America/New_York), the project owner reported access to the environment above and identified it as the BRMS target. This supersedes the previous target `722e9526-2b55-e3b0-8bfb-e4475649af19`.
+
+The latest pushed implementation baseline at that point was `97955772456e19c99fd10ebebfa3edd6ab96a025`, solution version `1.0.0.4`. No deployment to the new target is claimed by this update. Its display name, permissions, connections, existing BRMS flows, checker behavior and acceptance results require live verification. Local uncommitted draft definitions are not part of this baseline.
+
+Before importing, select the new environment by its exact ID, check for existing BRMS flows/solution, and bind `cr1e9_BRMSSharePoint` to a connection in that environment. Preserve the four existing SharePoint resources and independently configured source locations. Keep flow schedules disabled and reminders preview-only until synthetic-record acceptance passes. Record the actual package hash, import outcome, flow IDs/URLs and run evidence in the implementation Loop page.
+
+## Historical import blocker in the previous environment
+
+The prior investigation recorded a `RunSafeChecker` enforcement failure in environment `722e9526-2b55-e3b0-8bfb-e4475649af19`. The evidence below does not establish whether the new environment is affected or whether the BRMS flows execute correctly:
+
 
 - Import of a minimal single-`Compose`-action package (no connections, no expressions) to environment `722e9526-2b55-e3b0-8bfb-e4475649af19` failed with the identical server-side error.
 - Async operation `7987af49-44b2-f111-aaac-7ced8d3bdfca` completed with `statuscode=Failed` and message `An error occurred while trying to run solution checker enforcement on the importing solution.` (Activity ID `f53969c2-8637-41af-8de8-586b0a1576d2`, ErrorCode `-2147188660`).
@@ -44,13 +54,11 @@ These are structural refinements that align our workflow JSON with the tenant's 
 | BRMS Notification History | `ef96f9df-2e83-4040-9201-da4e8087918f` |
 | BRMS Automation Run History | `f0f62faf-86bb-4257-9c0d-f4f8571e71e2` |
 
-## Required Power Platform admin action
+## Current deployment path
 
-The only remaining path to create the three flows in environment `722e9526-2b55-e3b0-8bfb-e4475649af19` is a Power Platform admin action:
+Proceed with supported import or maker creation in the new target `2c2b2f3f-eec6-ea9e-a492-7114c0975e11`. The old environment's enforcement failure is retained as historical evidence, not an active diagnosis for this environment.
 
-1. Adjust or resolve the Managed Environments solution-checker enforcement setting for env `722e9526-2b55-e3b0-8bfb-e4475649af19` so `RunSafeChecker` does not fail every solution import. Supporting evidence: async op `7987af49-44b2-f111-aaac-7ced8d3bdfca`, activity `f53969c2-8637-41af-8de8-586b0a1576d2`.
-2. Alternatively, provision a target environment for BRMS whose Managed Environments policy does not block solution import.
-3. Alternatively, authorize maker-designer manual creation for the three flows and provide business decisions for reminder cadence and authorized test recipient.
+If this target rejects an import, capture its own operation ID and exact error, resolve actionable package findings, and escalate environment policy or service failures to the administrator. Do not disable enforcement or repeatedly import an unchanged rejected package.
 
 ## Prepared package regeneration
 
@@ -73,7 +81,7 @@ Bind the connection reference `cr1e9_BRMSSharePoint` (connector `/providers/Micr
 
 ## Post-import verification
 
-After the admin action succeeds and the package imports:
+After the package imports into the current target:
 
 1. Populate `BRMS Configuration` with `review-rules-v1`, `notification-settings-v1`, `source-library-map-v1`.
 2. Confirm flow names: `BRMS - GCT - Review Schedule Refresh`, `BRMS - GCT - Review Reminders`, `BRMS - GCT - Source Document Monitor`.
