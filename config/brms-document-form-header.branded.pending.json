@@ -1,0 +1,85 @@
+{
+  "elmType": "div",
+  "children": [
+    {
+      "elmType": "div",
+      "style": {
+        "display": "flex",
+        "justify-content": "space-between",
+        "align-items": "center",
+        "background-color": "#ffffff",
+        "padding": "16px 24px"
+      },
+      "children": [
+        {
+          "elmType": "img",
+          "attributes": {
+            "src": "https://reedelsevier.sharepoint.com/sites/ELSBUProjects/BRMS/SiteAssets/BR%20Logo.png",
+            "alt": "Business Resilience"
+          },
+          "style": {
+            "width": "270px",
+            "height": "96px",
+            "object-fit": "contain"
+          }
+        },
+        {
+          "elmType": "img",
+          "attributes": {
+            "src": "https://reedelsevier.sharepoint.com/sites/ELSBUProjects/BRMS/SiteAssets/Elsevier_Stacked%20Logo_VitalOrange_RGB.png",
+            "alt": "Elsevier"
+          },
+          "style": {
+            "width": "65px",
+            "height": "72px",
+            "object-fit": "contain"
+          }
+        }
+      ]
+    },
+    {
+      "elmType": "div",
+      "style": {
+        "background-color": "#142b40",
+        "border-left": "6px solid #eb8d23",
+        "padding": "22px 24px",
+        "margin-bottom": "20px",
+        "border-radius": "6px",
+        "display": "flex",
+        "flex-direction": "column",
+        "align-items": "flex-start"
+      },
+      "children": [
+        {
+          "elmType": "div",
+          "style": {
+            "color": "#f5b766",
+            "font-size": "12px",
+            "font-weight": "600",
+            "letter-spacing": "1px"
+          },
+          "txtContent": "BUSINESS RESILIENCE MANAGEMENT SYSTEM"
+        },
+        {
+          "elmType": "div",
+          "style": {
+            "color": "#ffffff",
+            "font-size": "26px",
+            "font-weight": "600",
+            "margin-top": "6px"
+          },
+          "txtContent": "Governance document record"
+        },
+        {
+          "elmType": "div",
+          "style": {
+            "color": "#e6edf3",
+            "font-size": "14px",
+            "margin-top": "10px"
+          },
+          "txtContent": "Keep ownership, document links and review dates current. Fields marked * are required."
+        }
+      ]
+    }
+  ]
+}
